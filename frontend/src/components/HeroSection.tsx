@@ -5,22 +5,22 @@ import InteractiveGrid from "./InteractiveGrid";
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen bg-[#faf9f5] flex flex-col overflow-hidden">
-      {/* Orange shape with asymmetric SVG bezier curve */}
+    <section className="relative min-h-screen bg-[#F8F7F3] flex flex-col overflow-hidden">
+      {/* Orange shape with dramatic asymmetric bezier curve */}
       <svg
         className="absolute top-0 left-0 w-full pointer-events-none z-0"
-        style={{ height: "58%" }}
-        viewBox="0 0 1440 580"
+        style={{ height: "72%" }}
+        viewBox="0 0 1440 880"
         preserveAspectRatio="none"
       >
         <path
-          d="M 0 0 L 1440 0 L 1440 400 C 960 470, 480 330, 0 450 Z"
+          d="M 0 550 Q 600 880 1440 80 L 1440 0 L 0 0 Z"
           fill="#FA9819"
         />
       </svg>
 
-      {/* Upper zone: Typewriter */}
-      <div className="relative z-10 flex items-center h-[52vh] w-full max-w-5xl mx-auto px-8">
+      {/* Upper zone: Typewriter — offset right for asymmetric composition */}
+      <div className="relative z-10 flex items-center h-[48vh] w-full max-w-5xl mx-auto pl-16 md:pl-24">
         <Typewriter />
       </div>
 

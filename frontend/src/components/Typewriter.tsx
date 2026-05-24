@@ -58,11 +58,11 @@ export default function Typewriter() {
   return (
     <div className="flex items-baseline gap-1">
       <span className="text-3xl md:text-5xl font-bold text-black tracking-wide">
-        我是&gt;{" "}
+        我是 &gt;{" "}
       </span>
-      <span className="text-3xl md:text-5xl font-bold text-black tracking-wide">
+      <span className="text-3xl md:text-5xl font-bold tracking-wide text-[#FF4A00]">
         {displayText}
-        <span className="inline-block w-[3px] h-[1em] bg-black ml-0.5 align-middle animate-pulse" />
+        <span className="inline-block w-[3px] h-[1em] bg-[#FF4A00] ml-0.5 align-middle animate-pulse" />
       </span>
     </div>
   );

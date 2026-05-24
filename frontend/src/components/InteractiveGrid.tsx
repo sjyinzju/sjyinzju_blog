@@ -2,21 +2,22 @@
 
 import { useEffect, useRef } from "react";
 
-const SPACING = 40;
-const RADIUS = 1.5;
-const REPULSION_DIST = 100;
-const REPULSION_STRENGTH = 20;
+const SPACING = 30;
+const DOT_RADIUS = 1;
+const REPULSION_RADIUS = 150;
+const MAX_DISPLACEMENT = 20;
+const LERP_FACTOR = 0.1;
 
-interface Dot {
-  rx: number;
-  ry: number;
-  cx: number;
-  cy: number;
+interface Particle {
+  baseX: number;
+  baseY: number;
+  x: number;
+  y: number;
 }
 
 export default function InteractiveGrid() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const dotsRef = useRef<Dot[]>([]);
+  const particlesRef = useRef<Particle[]>([]);
   const mouseRef = useRef({ x: -9999, y: -9999 });
   const rafRef = useRef(0);
 
@@ -26,56 +27,68 @@ export default function InteractiveGrid() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const initDots = () => {
-      const { width, height } = canvas;
-      const cols = Math.floor(width / SPACING);
-      const rows = Math.floor(height / SPACING);
-      const offsetX = (width - cols * SPACING) / 2 + SPACING / 2;
-      const offsetY = (height - rows * SPACING) / 2 + SPACING / 2;
-      const dots: Dot[] = [];
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const x = c * SPACING + offsetX;
-          const y = r * SPACING + offsetY;
-          dots.push({ rx: x, ry: y, cx: x, cy: y });
-        }
-      }
-      dotsRef.current = dots;
-    };
+    const dpr = window.devicePixelRatio || 1;
 
-    const resize = () => {
+    const initParticles = () => {
       const parent = canvas.parentElement;
       if (!parent) return;
-      const { clientWidth: w, clientHeight: h } = parent;
-      canvas.width = w;
-      canvas.height = h;
-      initDots();
+
+      const cssW = parent.clientWidth;
+      const cssH = parent.clientHeight;
+
+      // Retina: scale canvas buffer by dpr, display at CSS size
+      canvas.width = cssW * dpr;
+      canvas.height = cssH * dpr;
+      canvas.style.width = `${cssW}px`;
+      canvas.style.height = `${cssH}px`;
+
+      const cols = Math.floor(cssW / SPACING);
+      const rows = Math.floor(cssH / SPACING);
+      const offsetX = (cssW - cols * SPACING) / 2 + SPACING / 2;
+      const offsetY = (cssH - rows * SPACING) / 2 + SPACING / 2;
+
+      const particles: Particle[] = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const bx = c * SPACING + offsetX;
+          const by = r * SPACING + offsetY;
+          particles.push({ baseX: bx, baseY: by, x: bx, y: by });
+        }
+      }
+      particlesRef.current = particles;
     };
 
     const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+
       const mx = mouseRef.current.x;
       const my = mouseRef.current.y;
 
-      for (const dot of dotsRef.current) {
-        const dx = dot.cx - mx;
-        const dy = dot.cy - my;
+      for (const p of particlesRef.current) {
+        // Repulsion: vector from mouse to anchor point
+        const dx = p.baseX - mx;
+        const dy = p.baseY - my;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        if (dist < REPULSION_DIST && dist > 0.1) {
-          const force = (1 - dist / REPULSION_DIST) ** 2;
-          const tx = dot.rx + (dx / dist) * force * REPULSION_STRENGTH;
-          const ty = dot.ry + (dy / dist) * force * REPULSION_STRENGTH;
-          dot.cx += (tx - dot.cx) * 0.25;
-          dot.cy += (ty - dot.cy) * 0.25;
-        } else {
-          dot.cx += (dot.rx - dot.cx) * 0.08;
-          dot.cy += (dot.ry - dot.cy) * 0.08;
+        let targetX = p.baseX;
+        let targetY = p.baseY;
+
+        if (dist < REPULSION_RADIUS && dist > 0.001) {
+          const force = 1 - dist / REPULSION_RADIUS; // 1 → 0
+          const offset = force * MAX_DISPLACEMENT;
+          targetX = p.baseX + (dx / dist) * offset;
+          targetY = p.baseY + (dy / dist) * offset;
         }
 
+        // Spring lerp toward target
+        p.x += (targetX - p.x) * LERP_FACTOR;
+        p.y += (targetY - p.y) * LERP_FACTOR;
+
+        // Draw 1px dot
         ctx.beginPath();
-        ctx.arc(dot.cx, dot.cy, RADIUS, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0, 0, 0, 0.12)";
+        ctx.arc(p.x, p.y, DOT_RADIUS, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
         ctx.fill();
       }
 
@@ -90,22 +103,24 @@ export default function InteractiveGrid() {
       };
     };
 
-    resize();
+    const onResize = () => {
+      initParticles();
+    };
+
+    // Initialize
+    initParticles();
     rafRef.current = requestAnimationFrame(animate);
-    window.addEventListener("resize", resize);
-    canvas.addEventListener("mousemove", onMouseMove);
+
+    // Window-level listeners
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("resize", onResize);
 
     return () => {
       cancelAnimationFrame(rafRef.current);
-      window.removeEventListener("resize", resize);
-      canvas.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("resize", onResize);
     };
   }, []);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 z-0 opacity-20 pointer-events-auto"
-    />
-  );
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0" />;
 }

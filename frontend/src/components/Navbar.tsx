@@ -13,10 +13,7 @@ const navItems = [
 export default function Navbar() {
   return (
     <nav className="fixed top-0 w-full z-50 bg-white/40 backdrop-blur-md border-b border-white/20">
-      <div className="max-w-5xl mx-auto flex items-center justify-between px-8 h-16">
-        <a href="#" className="text-lg font-bold tracking-wider text-[#1a1a1a]">
-          主页
-        </a>
+      <div className="flex items-center h-16 pl-[15%]">
         <ul className="flex items-center gap-8 text-sm tracking-wide text-[#555]">
           {navItems.map((item) => (
             <li key={item.label}>
