@@ -9,18 +9,18 @@ export default function HeroSection() {
       {/* Orange shape with dramatic asymmetric bezier curve */}
       <svg
         className="absolute top-0 left-0 w-full pointer-events-none z-0"
-        style={{ height: "72%" }}
-        viewBox="0 0 1440 880"
+        style={{ height: "90%" }}
+        viewBox="0 0 1440 900"
         preserveAspectRatio="none"
       >
         <path
-          d="M 0 550 Q 600 880 1440 80 L 1440 0 L 0 0 Z"
+          d="M 1440 700 Q 840 940 0 500 L 0 0 L 1440 0 Z"
           fill="#FA9819"
         />
       </svg>
 
       {/* Upper zone: Typewriter — offset right for asymmetric composition */}
-      <div className="relative z-10 flex items-center h-[48vh] w-full max-w-5xl mx-auto pl-16 md:pl-24">
+      <div className="relative z-10 flex items-center h-[48vh] w-full max-w-5xl mx-auto pl-20 md:pl-28">
         <Typewriter />
       </div>
 

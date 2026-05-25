@@ -88,7 +88,7 @@ export default function InteractiveGrid() {
         // Draw 1px dot
         ctx.beginPath();
         ctx.arc(p.x, p.y, DOT_RADIUS, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
+        ctx.fillStyle = "rgba(80, 80, 80, 0.18)";
         ctx.fill();
       }
 
