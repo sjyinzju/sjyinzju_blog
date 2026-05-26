@@ -33,7 +33,7 @@ export default function SectionBlock({ title, content, align }: Props) {
         >
           <motion.path
             d="M 1 0 C 0 35, 2 70, 1 100 C 0 130, 2 165, 1 200"
-            stroke="#FA9819"
+            stroke="#FF4A00"
             strokeWidth="1.5"
             strokeLinecap="round"
             initial={{ pathLength: 0 }}
