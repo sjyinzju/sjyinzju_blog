@@ -1,5 +1,7 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
 
 const navItems = [
@@ -33,6 +35,8 @@ const child = {
 };
 
 export default function Navbar() {
+  const pathname = usePathname();
+
   return (
     <nav className="fixed top-0 w-full z-50 bg-transparent backdrop-blur-md border-b border-white/20">
       <div className="flex items-center h-16 pl-[15%]">
@@ -42,16 +46,21 @@ export default function Navbar() {
           initial="hidden"
           animate="visible"
         >
-          {navItems.map((item) => (
-            <motion.li key={item.label} variants={child}>
-              <a
-                href={item.href}
-                className="relative inline-block py-1 transition-transform duration-300 ease-out hover:-translate-y-0.5 hover:text-[#1a1a1a]"
-              >
-                {item.label}
-              </a>
-            </motion.li>
-          ))}
+          {navItems.map((item) => {
+            const isActive = pathname.startsWith(item.href);
+            return (
+              <motion.li key={item.label} variants={child}>
+                <Link
+                  href={item.href}
+                  className={`relative inline-block py-1 transition-transform duration-300 ease-out hover:-translate-y-0.5 hover:text-[#1a1a1a] ${
+                    isActive ? "font-bold text-[#1a1a1a]" : ""
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              </motion.li>
+            );
+          })}
         </motion.ul>
       </div>
     </nav>
