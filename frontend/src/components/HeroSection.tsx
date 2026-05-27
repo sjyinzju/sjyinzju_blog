@@ -2,14 +2,10 @@
 
 import { motion } from "framer-motion";
 import Typewriter from "./Typewriter";
-import InteractiveGrid from "./InteractiveGrid";
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen bg-[#F8F7F3] overflow-hidden">
-      {/* Dot grid covers entire background — masked by orange SVG in top area */}
-      <InteractiveGrid />
-
+    <section className="relative min-h-screen overflow-hidden">
       {/* Orange shape slides in from top */}
       <motion.svg
         className="absolute top-0 left-0 w-full pointer-events-none z-0"

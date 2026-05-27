@@ -1,14 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import InteractiveGrid from "./InteractiveGrid";
 
 export default function SubPageHero({ title }: { title: string }) {
   return (
-    <section className="relative h-[35vh] bg-[#F8F7F3] overflow-hidden pt-16">
-      <InteractiveGrid />
-
-      {/* Small orange section — shifted slightly down */}
+    <section className="relative h-[35vh] overflow-hidden pt-16">
+      {/* Small orange section */}
       <motion.svg
         className="absolute top-0 left-0 w-full pointer-events-none z-0"
         style={{ height: "100%" }}
@@ -24,7 +21,7 @@ export default function SubPageHero({ title }: { title: string }) {
         />
       </motion.svg>
 
-      {/* Title — same position & size as "我是" on home */}
+      {/* Title */}
       <motion.div
         className="absolute top-[50%] left-0 right-0 z-10 pl-[18vw] md:pl-[22vw]"
         initial={{ opacity: 0, y: 20 }}

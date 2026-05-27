@@ -1,5 +1,5 @@
-import SubPageHero from "@/components/SubPageHero";
+import SubPageContent from "@/components/SubPageContent";
 
 export default function ResourcesPage() {
-  return <SubPageHero title="资源" />;
+  return <SubPageContent title="资源" />;
 }

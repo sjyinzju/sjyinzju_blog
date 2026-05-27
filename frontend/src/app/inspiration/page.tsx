@@ -1,5 +1,5 @@
-import SubPageHero from "@/components/SubPageHero";
+import SubPageContent from "@/components/SubPageContent";
 
 export default function InspirationPage() {
-  return <SubPageHero title="灵感与分享" />;
+  return <SubPageContent title="灵感与分享" />;
 }

@@ -1,5 +1,5 @@
-import SubPageHero from "@/components/SubPageHero";
+import SubPageContent from "@/components/SubPageContent";
 
 export default function ProjectsPage() {
-  return <SubPageHero title="项目开发" />;
+  return <SubPageContent title="项目开发" />;
 }

@@ -1,5 +1,5 @@
-import SubPageHero from "@/components/SubPageHero";
+import SubPageContent from "@/components/SubPageContent";
 
 export default function AboutPage() {
-  return <SubPageHero title="关于" />;
+  return <SubPageContent title="关于" />;
 }

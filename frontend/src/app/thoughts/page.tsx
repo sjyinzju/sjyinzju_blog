@@ -1,5 +1,5 @@
-import SubPageHero from "@/components/SubPageHero";
+import SubPageContent from "@/components/SubPageContent";
 
 export default function ThoughtsPage() {
-  return <SubPageHero title="思考" />;
+  return <SubPageContent title="思考" />;
 }

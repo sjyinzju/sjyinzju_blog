@@ -1,5 +1,5 @@
-import SubPageHero from "@/components/SubPageHero";
+import SubPageContent from "@/components/SubPageContent";
 
 export default function VideosPage() {
-  return <SubPageHero title="视频" />;
+  return <SubPageContent title="视频" />;
 }

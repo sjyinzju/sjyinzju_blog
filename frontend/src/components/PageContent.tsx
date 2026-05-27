@@ -85,17 +85,19 @@ export default function PageContent() {
   const heroY = useTransform(scrollY, [0, 500], [0, -180]);
 
   return (
-    <>
-      {/* Parallax Hero wrapper — clipped at 100vh, no gap */}
-      <div className="h-screen overflow-hidden relative z-0 bg-[#F8F7F3]">
+    <div className="relative bg-[#F8F7F3]">
+      {/* Single unified dot grid across entire page */}
+      <InteractiveGrid />
+
+      {/* Hero — clipped at 100vh, parallax pull-away */}
+      <div className="h-screen overflow-hidden relative z-0">
         <motion.div style={{ y: heroY }}>
           <HeroSection />
         </motion.div>
       </div>
 
-      {/* Zigzag content sections — continuous dot grid */}
-      <div className="relative z-10 bg-[#F8F7F3]">
-        <InteractiveGrid />
+      {/* Content sections — transparent, grid shows through */}
+      <div className="relative z-10">
         {sections.map((s) => (
           <SectionBlock
             key={s.title}
@@ -105,6 +107,6 @@ export default function PageContent() {
           />
         ))}
       </div>
-    </>
+    </div>
   );
 }

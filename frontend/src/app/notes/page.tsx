@@ -1,5 +1,5 @@
-import SubPageHero from "@/components/SubPageHero";
+import SubPageContent from "@/components/SubPageContent";
 
 export default function NotesPage() {
-  return <SubPageHero title="笔记" />;
+  return <SubPageContent title="笔记" />;
 }
