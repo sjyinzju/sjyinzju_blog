@@ -4,10 +4,10 @@ import NotFound from "@/app/not-found";
 
 export const dynamic = "force-dynamic";
 
-export default async function PostPage({
+export default async function CategoryPostPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ category: string; slug: string }>;
 }) {
   const { slug } = await params;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
@@ -36,16 +36,37 @@ const child = {
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleBrandClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (pathname === "/") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      router.push("/");
+    }
+  };
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-transparent backdrop-blur-md border-b border-white/20">
-      <div className="flex items-center h-16 pl-[15%]">
-        <motion.ul
-          className="flex items-center gap-8 text-base tracking-wide text-[#555]"
-          variants={container}
-          initial="hidden"
-          animate="visible"
-        >
+      <motion.div
+        className="flex items-center h-16 pl-[15%]"
+        variants={container}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Brand */}
+        <motion.div variants={child}>
+          <a
+            href="/"
+            onClick={handleBrandClick}
+            className="text-lg font-bold tracking-wide text-[#FF4A00] mr-10 transition-transform duration-300 ease-out hover:-translate-y-0.5"
+          >
+            Sjy_in_zju
+          </a>
+        </motion.div>
+
+        <ul className="flex items-center gap-8 text-base tracking-wide text-[#555]">
           {navItems.map((item) => {
             const isActive = pathname.startsWith(item.href);
             return (
@@ -61,8 +82,8 @@ export default function Navbar() {
               </motion.li>
             );
           })}
-        </motion.ul>
-      </div>
+        </ul>
+      </motion.div>
     </nav>
   );
 }

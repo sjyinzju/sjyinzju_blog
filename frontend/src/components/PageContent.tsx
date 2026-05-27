@@ -6,8 +6,6 @@ import HeroSection from "./HeroSection";
 import SectionBlock from "./SectionBlock";
 import HighlightText from "./HighlightText";
 import InteractiveGrid from "./InteractiveGrid";
-import PostListItem from "./PostListItem";
-
 const TAG_ORDER = ["笔记", "思考", "视频", "项目开发", "灵感与分享", "资源", "关于"];
 
 const alignMap: Record<string, "left" | "right"> = {
@@ -35,20 +33,12 @@ export default function PageContent({ posts }: { posts: Post[] }) {
   const heroY = useTransform(scrollY, [0, 500], [0, -180]);
 
   const sections = TAG_ORDER.map((tag) => {
-    const filtered = posts.filter((p) => p.tags.includes(tag));
     return {
       title: tag,
       align: alignMap[tag],
       content: (
         <div>
           <p className="mb-6">{descriptions[tag]}</p>
-          {filtered.length > 0 && (
-            <div className="space-y-5 mt-8">
-              {filtered.map((post) => (
-                <PostListItem key={post.id} post={post} />
-              ))}
-            </div>
-          )}
         </div>
       ),
     };

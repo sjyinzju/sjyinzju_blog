@@ -1,13 +1,14 @@
 "use client";
 
 import type { Post } from "@/types/post";
+import { getCategoryUrl } from "@/lib/config";
 import InteractiveGrid from "./InteractiveGrid";
 import SubPageHero from "./SubPageHero";
 import Link from "next/link";
 
 export default function ArticleContent({ post }: { post: Post }) {
   const backHref = post.tags.length > 0
-    ? `/${mapTagToRoute(post.tags[0])}`
+    ? `/${getCategoryUrl(post.tags[0])}`
     : "/";
 
   return (
@@ -18,7 +19,7 @@ export default function ArticleContent({ post }: { post: Post }) {
       {/* Back arrow */}
       <Link
         href={backHref}
-        className="fixed top-[72px] left-6 z-50 text-2xl text-[#FF4A00] transition-transform duration-300 ease-out hover:-translate-y-0.5"
+        className="fixed top-[72px] left-6 z-50 text-2xl font-black text-[#FF4A00] transition-transform duration-300 ease-out hover:-translate-y-0.5"
       >
         &larr;
       </Link>
@@ -38,17 +39,4 @@ export default function ArticleContent({ post }: { post: Post }) {
       </article>
     </div>
   );
-}
-
-function mapTagToRoute(tag: string): string {
-  const map: Record<string, string> = {
-    "笔记": "notes",
-    "思考": "thoughts",
-    "视频": "videos",
-    "项目开发": "projects",
-    "灵感与分享": "inspiration",
-    "资源": "resources",
-    "关于": "about",
-  };
-  return map[tag] || "/";
 }
