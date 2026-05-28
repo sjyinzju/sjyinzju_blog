@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Typewriter from "./Typewriter";
+import MottoLines from "./MottoLines";
 
 export default function HeroSection() {
   return (
@@ -31,6 +32,11 @@ export default function HeroSection() {
       >
         <Typewriter />
       </motion.div>
+
+      {/* Motto lines */}
+      <div className="absolute top-[38vh] left-0 right-0 z-10 pl-[18vw] md:pl-[22vw]">
+        <MottoLines />
+      </div>
     </section>
   );
 }
