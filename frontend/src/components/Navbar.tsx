@@ -9,7 +9,7 @@ const navItems = [
   { label: "思考", href: "/thoughts" },
   { label: "视频", href: "/videos" },
   { label: "项目开发", href: "/projects" },
-  { label: "灵感与分享", href: "/inspiration" },
+  { label: "灵感", href: "/inspiration" },
   { label: "资源", href: "/resources" },
   { label: "关于", href: "/about" },
 ];
