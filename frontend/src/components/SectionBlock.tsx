@@ -1,24 +1,39 @@
 "use client";
 
 import { useRef } from "react";
+import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 
 interface Props {
   title: string;
   content: React.ReactNode;
   align: "left" | "right";
+  href?: string;
 }
 
-export default function SectionBlock({ title, content, align }: Props) {
+export default function SectionBlock({ title, content, align, href }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-15% 0px" });
 
   const isLeft = align === "left";
 
+  const titleElement = href ? (
+    <Link
+      href={href}
+      className="inline-block text-2xl font-bold mb-6 tracking-wide text-[#1a1a1a] transition-transform duration-300 ease-out hover:-translate-y-0.5 hover:text-[#FF4A00]"
+    >
+      {title}
+    </Link>
+  ) : (
+    <h2 className="text-2xl font-bold mb-6 tracking-wide text-[#1a1a1a]">
+      {title}
+    </h2>
+  );
+
   return (
     <section
       ref={ref}
-      className={`min-h-[50vh] flex items-center max-w-4xl mx-auto px-8 py-10 gap-6 ${
+      className={`min-h-[40vh] flex items-center max-w-4xl mx-auto px-8 py-6 gap-6 ${
         isLeft ? "flex-row" : "flex-row-reverse"
       }`}
     >
@@ -50,9 +65,7 @@ export default function SectionBlock({ title, content, align }: Props) {
         animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.5, delay: 0.25, ease: [0.76, 0, 0.24, 1] }}
       >
-        <h2 className="text-2xl font-bold mb-6 tracking-wide text-[#1a1a1a]">
-          {title}
-        </h2>
+        {titleElement}
         <div className="text-base leading-loose tracking-wide text-[#666]">
           {content}
         </div>

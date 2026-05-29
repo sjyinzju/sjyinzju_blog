@@ -35,6 +35,9 @@ export default function AboutPage() {
       <SubPageHero title="关于" />
 
       <div className="relative z-10 max-w-5xl ml-[15%] pl-8 pr-12 py-16 space-y-8">
+        <h3 className="text-2xl font-bold tracking-wide text-[#1a1a1a] mb-8">
+          为能够成为自己而挺起胸膛
+        </h3>
         {accounts.map((account) => (
           <SocialListItem
             key={account.platform}

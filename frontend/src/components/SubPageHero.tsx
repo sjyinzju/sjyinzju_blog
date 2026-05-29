@@ -2,28 +2,44 @@
 
 import { motion } from "framer-motion";
 
-export default function SubPageHero({ title }: { title: string }) {
+export default function SubPageHero({ title, image }: { title: string; image?: string }) {
   return (
-    <section className="relative h-[35vh] overflow-hidden pt-16">
-      {/* Small orange section */}
+    <section className="relative h-[60vh] overflow-hidden pt-16">
+      {/* 橙色背景弧线 */}
       <motion.svg
         className="absolute top-0 left-0 w-full pointer-events-none z-0"
         style={{ height: "100%" }}
-        viewBox="0 0 1440 350"
+        viewBox="0 0 1440 750"
         preserveAspectRatio="none"
         initial={{ y: "-100%" }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
       >
         <path
-          d="M 1440 270 Q 840 350 0 230 L 0 0 L 1440 0 Z"
+          d="M 1440 460 Q 840 750 0 370 L 0 0 L 1440 0 Z"
           fill="#FA9819"
         />
       </motion.svg>
 
-      {/* Title */}
+      {/* 装饰人物 (精准定位在曲线最低点，呈现坐姿透视) */}
+      {image && (
+        <motion.div
+          className="absolute z-10 bottom-[8%] md:bottom-[3.2%] left-[58%] -translate-x-1/2"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
+        >
+          <img
+            src={image}
+            alt="hero decor"
+            className="h-[35vh] md:h-[55vh] w-auto object-contain pointer-events-none drop-shadow-2xl"
+          />
+        </motion.div>
+      )}
+
+      {/* 页面标题 */}
       <motion.div
-        className="absolute top-[50%] left-0 right-0 z-10 pl-[18vw] md:pl-[22vw]"
+        className="absolute top-[30%] left-0 right-0 z-10 pl-[18vw] md:pl-[22vw]"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6, duration: 0.5, ease: [0.76, 0, 0.24, 1] }}

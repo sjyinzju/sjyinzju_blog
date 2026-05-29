@@ -2,6 +2,7 @@
 
 import type { Post } from "@/types/post";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { getCategoryUrl } from "@/lib/config";
 import HeroSection from "./HeroSection";
 import SectionBlock from "./SectionBlock";
 import HighlightText from "./HighlightText";
@@ -36,6 +37,7 @@ export default function PageContent({ posts }: { posts: Post[] }) {
     return {
       title: tag,
       align: alignMap[tag],
+      href: `/${getCategoryUrl(tag)}`,
       content: (
         <div>
           <p className="mb-6">{descriptions[tag]}</p>
@@ -48,7 +50,7 @@ export default function PageContent({ posts }: { posts: Post[] }) {
     <div className="relative bg-[#F8F7F3]">
       <InteractiveGrid />
 
-      <div className="h-screen overflow-hidden relative z-0">
+      <div className="h-[85vh] overflow-hidden relative z-0">
         <motion.div style={{ y: heroY }}>
           <HeroSection />
         </motion.div>
@@ -61,6 +63,7 @@ export default function PageContent({ posts }: { posts: Post[] }) {
             title={s.title}
             content={s.content}
             align={s.align}
+            href={s.href}
           />
         ))}
       </div>

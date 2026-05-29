@@ -11,9 +11,9 @@ export default async function ProjectsPage() {
   return (
     <div className="relative min-h-screen bg-[#F8F7F3]">
       <InteractiveGrid />
-      <SubPageHero title="项目开发" />
+      <SubPageHero title="项目开发" image="/projects.png" />
 
-      <div className="relative z-10 max-w-5xl ml-[15%] pl-8 pr-12 py-16 space-y-10">
+      <div className="relative z-10 max-w-5xl ml-[15%] pl-8 pr-12 pt-0 pb-16 -mt-20 space-y-10">
         {/* Own projects section */}
         {own.length > 0 && (
           <>
