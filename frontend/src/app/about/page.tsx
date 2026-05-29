@@ -33,7 +33,7 @@ export default function AboutPage() {
   return (
     <div className="relative min-h-screen bg-[#F8F7F3]">
       <InteractiveGrid />
-      <SubPageHero title="关于" image={aboutImg.src} imageClassName="h-[24vh] md:h-[40vh]" imagePositionClass="bottom-[23%] md:bottom-[20%]" clipImage />
+      <SubPageHero title="关于" image={aboutImg.src} imageClassName="h-[24vh] md:h-[40vh]" imagePositionClass="bottom-[23%] md:bottom-[19.9%] left-[63%]" />
 
       <div className="relative z-10 max-w-5xl ml-[15%] pl-8 pr-12 pt-0 pb-16 -mt-20 space-y-8">
         <h3 className="text-2xl font-bold tracking-wide text-[#1a1a1a] mb-8">

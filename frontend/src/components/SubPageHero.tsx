@@ -2,9 +2,8 @@
 
 import { motion } from "framer-motion";
 
-export default function SubPageHero({ title, image, imageClassName, imagePositionClass, clipImage }: { title: string; image?: string; imageClassName?: string; imagePositionClass?: string; clipImage?: number | boolean }) {
+export default function SubPageHero({ title, image, imageClassName, imagePositionClass, clipImage }: { title: string; image?: string; imageClassName?: string; imagePositionClass?: string; clipImage?: boolean | number }) {
   const partialRight = typeof clipImage === "number" ? clipImage : 0;
-
   return (
     <section className="relative h-[60vh] overflow-hidden pt-16">
       {/* 橙色背景弧线 */}
@@ -39,7 +38,7 @@ export default function SubPageHero({ title, image, imageClassName, imagePositio
         </motion.div>
       )}
 
-      {/* 全宽曲线遮罩：遮挡图片超出橙色曲线的部分 (clipImage=true) */}
+      {/* 全宽遮罩 (clipImage=true) */}
       {image && clipImage === true && (
         <motion.svg
           className="absolute top-0 left-0 w-full pointer-events-none z-[6]"
@@ -51,13 +50,13 @@ export default function SubPageHero({ title, image, imageClassName, imagePositio
           transition={{ duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
         >
           <path
-            d="M 0 370 Q 840 750 1440 460 L 1440 750 L 0 750 Z"
+            d="M 0 370 Q 840 750 1440 460 L 1440 615 L 0 615 Z"
             fill="#F8F7F3"
           />
         </motion.svg>
       )}
 
-      {/* 部分曲线遮罩：只遮挡右侧 N% 超出曲线的部分 (clipImage=number) */}
+      {/* 右侧部分遮罩 (clipImage=number) */}
       {image && partialRight > 0 && partialRight < 100 && (
         <motion.svg
           className="absolute top-0 left-0 w-full pointer-events-none z-[6]"
@@ -79,7 +78,7 @@ export default function SubPageHero({ title, image, imageClassName, imagePositio
             </clipPath>
           </defs>
           <path
-            d="M 0 370 Q 840 750 1440 460 L 1440 750 L 0 750 Z"
+            d="M 0 370 Q 840 750 1440 460 L 1440 720 L 0 720 Z"
             fill="#F8F7F3"
             clipPath="url(#partialOverlayClip)"
           />

@@ -19,7 +19,7 @@ export default function SubPageContent({
   image?: string;
   imageClassName?: string;
   imagePositionClass?: string;
-  clipImage?: number | boolean;
+  clipImage?: boolean;
 }) {
   return (
     <div className="relative min-h-screen bg-[#F8F7F3]">

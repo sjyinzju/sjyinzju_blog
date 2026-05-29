@@ -51,7 +51,7 @@ export default function HeroSection({ image, imageClassName, imagePositionClass,
           transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
         >
           <path
-            d="M 0 500 Q 840 940 1440 700 L 1440 900 L 0 900 Z"
+            d="M 0 500 Q 840 940 1440 700 L 1440 815 L 0 815 Z"
             fill="#F8F7F3"
           />
         </motion.svg>
