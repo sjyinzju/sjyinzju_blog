@@ -81,8 +81,10 @@ export default function PostListItem({
       {/* Orange vertical line */}
       <div className="w-[2px] flex-shrink-0 self-stretch bg-[#FF4A00] rounded-full" />
 
-      <div className="flex-1 min-w-0 flex items-center">
-        <div className="flex-1 min-w-0">
+      {/* Inner content: left-right split */}
+      <div className="flex flex-row justify-between items-start w-full">
+        {/* Left: Title + Summary */}
+        <div className="flex-1 min-w-0 pr-6">
           {externalUrl ? (
             <a
               href={externalUrl}
@@ -107,36 +109,36 @@ export default function PostListItem({
         </div>
 
         {/* Right: GitHub meta */}
-        {stars !== undefined ? (
-          <div className="flex-shrink-0 flex items-center justify-end gap-2.5 pl-4">
-            {language && (
-              <span className="flex items-center gap-1.5 text-sm text-[#888]">
-                <span
-                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                  style={{
-                    backgroundColor:
-                      LANGUAGE_COLORS[language] || "#bbb",
-                  }}
-                />
-                {language}
+        <div className="flex-shrink-0 flex items-center gap-4 mt-1">
+          {stars !== undefined && (
+            <>
+              {language && (
+                <span className="flex items-center gap-1.5 text-sm text-[#888]">
+                  <span
+                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                    style={{
+                      backgroundColor:
+                        LANGUAGE_COLORS[language] || "#bbb",
+                    }}
+                  />
+                  {language}
+                </span>
+              )}
+              <span className="flex items-center gap-1 px-2.5 py-0.5 text-sm text-[#666] border border-[#ddd] rounded-full flex-shrink-0">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  className="text-[#eac54f]"
+                >
+                  <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25z" />
+                </svg>
+                {stars}
               </span>
-            )}
-            <span className="flex items-center gap-1 px-2.5 py-0.5 text-sm text-[#666] border border-[#ddd] rounded-full flex-shrink-0">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 16 16"
-                fill="currentColor"
-                className="text-[#eac54f]"
-              >
-                <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25z" />
-              </svg>
-              {stars}
-            </span>
-          </div>
-        ) : (
-          <div className="w-[80px] flex-shrink-0" />
-        )}
+            </>
+          )}
+        </div>
       </div>
     </motion.div>
   );

@@ -12,7 +12,7 @@ export default async function ProjectsPage() {
       <InteractiveGrid />
       <SubPageHero title="项目开发" />
 
-      <div className="relative z-10 max-w-2xl ml-[15%] pl-8 pr-8 py-16 space-y-10">
+      <div className="relative z-10 max-w-5xl ml-[15%] pl-8 pr-12 py-16 space-y-10">
         {sorted.map((repo) => (
           <PostListItem
             key={repo.id}

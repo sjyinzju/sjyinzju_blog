@@ -18,7 +18,7 @@ export default function SectionBlock({ title, content, align }: Props) {
   return (
     <section
       ref={ref}
-      className={`min-h-[65vh] flex items-center max-w-4xl mx-auto px-8 py-16 gap-8 ${
+      className={`min-h-[50vh] flex items-center max-w-4xl mx-auto px-8 py-10 gap-6 ${
         isLeft ? "flex-row" : "flex-row-reverse"
       }`}
     >
