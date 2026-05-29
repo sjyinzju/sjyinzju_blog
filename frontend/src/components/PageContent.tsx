@@ -29,7 +29,7 @@ const descriptions: Record<string, React.ReactNode> = {
   "关于": <>我是<HighlightText delay={0.8}>开发者、写作者、跑者、剪辑师、UP主、创造者</HighlightText>。多重身份的背后，是对创造这件事始终如一的热爱。</>,
 };
 
-export default function PageContent({ posts }: { posts: Post[] }) {
+export default function PageContent({ posts, image, imageClassName, imagePositionClass, clipImage }: { posts: Post[]; image?: string; imageClassName?: string; imagePositionClass?: string; clipImage?: boolean }) {
   const { scrollY } = useScroll();
   const heroY = useTransform(scrollY, [0, 500], [0, -180]);
 
@@ -52,7 +52,7 @@ export default function PageContent({ posts }: { posts: Post[] }) {
 
       <div className="h-[85vh] overflow-hidden relative z-0">
         <motion.div style={{ y: heroY }}>
-          <HeroSection />
+          <HeroSection image={image} imageClassName={imageClassName} imagePositionClass={imagePositionClass} clipImage={clipImage} />
         </motion.div>
       </div>
 

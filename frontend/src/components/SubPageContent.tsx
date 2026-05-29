@@ -12,17 +12,19 @@ export default function SubPageContent({
   image,
   imageClassName,
   imagePositionClass,
+  clipImage,
 }: {
   title: string;
   posts: Post[];
   image?: string;
   imageClassName?: string;
   imagePositionClass?: string;
+  clipImage?: number | boolean;
 }) {
   return (
     <div className="relative min-h-screen bg-[#F8F7F3]">
       <InteractiveGrid />
-      <SubPageHero title={title} image={image} imageClassName={imageClassName} imagePositionClass={imagePositionClass} />
+      <SubPageHero title={title} image={image} imageClassName={imageClassName} imagePositionClass={imagePositionClass} clipImage={clipImage} />
 
       <div className="relative z-10 ml-[15%] pl-8 pr-8 py-16 space-y-6">
         {posts.map((post) => (
