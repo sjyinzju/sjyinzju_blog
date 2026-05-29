@@ -9,14 +9,20 @@ import PostListItem from "./PostListItem";
 export default function SubPageContent({
   title,
   posts,
+  image,
+  imageClassName,
+  imagePositionClass,
 }: {
   title: string;
   posts: Post[];
+  image?: string;
+  imageClassName?: string;
+  imagePositionClass?: string;
 }) {
   return (
     <div className="relative min-h-screen bg-[#F8F7F3]">
       <InteractiveGrid />
-      <SubPageHero title={title} />
+      <SubPageHero title={title} image={image} imageClassName={imageClassName} imagePositionClass={imagePositionClass} />
 
       <div className="relative z-10 ml-[15%] pl-8 pr-8 py-16 space-y-6">
         {posts.map((post) => (

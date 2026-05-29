@@ -2,6 +2,7 @@ import { getOriginalRepos } from "@/lib/github";
 import InteractiveGrid from "@/components/InteractiveGrid";
 import SubPageHero from "@/components/SubPageHero";
 import PostListItem from "@/components/PostListItem";
+import projectsImg from "../../../pictures/projects.png";
 
 const sectionTitleClass = "text-2xl font-bold tracking-wide text-[#1a1a1a] mb-6";
 
@@ -11,7 +12,7 @@ export default async function ProjectsPage() {
   return (
     <div className="relative min-h-screen bg-[#F8F7F3]">
       <InteractiveGrid />
-      <SubPageHero title="项目开发" image="/projects.png" />
+      <SubPageHero title="项目开发" image={projectsImg.src} />
 
       <div className="relative z-10 max-w-5xl ml-[15%] pl-8 pr-12 pt-0 pb-16 -mt-20 space-y-10">
         {/* Own projects section */}

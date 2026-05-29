@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 
-export default function SubPageHero({ title, image }: { title: string; image?: string }) {
+export default function SubPageHero({ title, image, imageClassName, imagePositionClass }: { title: string; image?: string; imageClassName?: string; imagePositionClass?: string }) {
   return (
     <section className="relative h-[60vh] overflow-hidden pt-16">
       {/* 橙色背景弧线 */}
@@ -24,15 +24,15 @@ export default function SubPageHero({ title, image }: { title: string; image?: s
       {/* 装饰人物 (精准定位在曲线最低点，呈现坐姿透视) */}
       {image && (
         <motion.div
-          className="absolute z-10 bottom-[8%] md:bottom-[3.2%] left-[58%] -translate-x-1/2"
-          initial={{ opacity: 0, y: 30 }}
+          className={`absolute z-10 left-[62%] -translate-x-1/2 ${imagePositionClass || "bottom-[8%] md:bottom-[3.2%]"}`}
+          initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
         >
           <img
             src={image}
             alt="hero decor"
-            className="h-[35vh] md:h-[55vh] w-auto object-contain pointer-events-none drop-shadow-2xl"
+            className={`w-auto object-contain pointer-events-none drop-shadow-2xl ${imageClassName || "h-[35vh] md:h-[55vh]"}`}
           />
         </motion.div>
       )}
