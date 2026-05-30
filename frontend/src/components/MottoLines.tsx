@@ -11,7 +11,7 @@ function MottoLine({ text, index }: { text: string; index: number }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
-        delay: 1.6 + index * 0.2,
+        delay: 0.8 + index * 0.2,
         duration: 0.5,
         ease: [0.76, 0, 0.24, 1],
       }}
@@ -26,7 +26,7 @@ function MottoLine({ text, index }: { text: string; index: number }) {
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{
-          delay: 1.9 + index * 0.2,
+          delay: 1.1 + index * 0.2,
           duration: 0.55,
           ease: [0.76, 0, 0.24, 1],
         }}
@@ -37,7 +37,7 @@ function MottoLine({ text, index }: { text: string; index: number }) {
 
 export default function MottoLines() {
   return (
-    <div className="flex flex-col gap-1 items-start">
+    <div className="flex flex-col gap-2 items-start">
       {LINES.map((text, i) => (
         <MottoLine key={text} text={text} index={i} />
       ))}

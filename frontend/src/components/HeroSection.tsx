@@ -62,9 +62,9 @@ export default function HeroSection({ image, imageClassName, imagePositionClass,
         className="absolute top-[22vh] left-0 right-0 z-10 pl-[18vw] md:pl-[22vw]"
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
+        transition={{ delay: 0, duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
       >
-        <Typewriter />
+        <Typewriter startDelay={1.3} />
       </motion.div>
 
       {/* Motto lines */}

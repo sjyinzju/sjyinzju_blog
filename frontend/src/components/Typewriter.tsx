@@ -7,10 +7,11 @@ const TYPE_SPEED = 100;
 const DELETE_SPEED = 50;
 const PAUSE_DURATION = 3000;
 
-export default function Typewriter() {
+export default function Typewriter({ startDelay = 0 }: { startDelay?: number }) {
   const [displayText, setDisplayText] = useState("");
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [started, setStarted] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const getNextIndex = useCallback((current: number): number => {
@@ -22,7 +23,20 @@ export default function Typewriter() {
     return next;
   }, []);
 
+  // 延迟启动
   useEffect(() => {
+    if (startDelay <= 0) {
+      setStarted(true);
+      return;
+    }
+    const t = setTimeout(() => setStarted(true), startDelay * 1000);
+    return () => clearTimeout(t);
+  }, [startDelay]);
+
+  // 打字循环
+  useEffect(() => {
+    if (!started) return;
+
     const currentWord = WORDS[currentWordIndex];
 
     if (!isDeleting && displayText === currentWord) {
@@ -53,7 +67,7 @@ export default function Typewriter() {
         clearTimeout(timerRef.current);
       }
     };
-  }, [displayText, currentWordIndex, isDeleting, getNextIndex]);
+  }, [displayText, currentWordIndex, isDeleting, getNextIndex, started]);
 
   return (
     <div className="flex items-baseline gap-1">
