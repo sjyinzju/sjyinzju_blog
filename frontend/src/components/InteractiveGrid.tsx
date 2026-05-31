@@ -15,7 +15,7 @@ interface Particle {
   y: number;
 }
 
-export default function InteractiveGrid() {
+export default function InteractiveGrid({ className }: { className?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const mouseRef = useRef({ x: -9999, y: -9999 });
@@ -138,5 +138,7 @@ export default function InteractiveGrid() {
     };
   }, [onMouseMove, onResize]);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 z-0" />;
+  const defaultClass = "absolute inset-0 z-0";
+
+  return <canvas ref={canvasRef} className={className || defaultClass} />;
 }

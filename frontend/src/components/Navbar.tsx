@@ -50,7 +50,7 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 w-full z-50 bg-transparent backdrop-blur-md border-b border-white/20">
       <motion.div
-        className="flex items-center h-16 pl-[15%]"
+        className="flex items-center h-16 pl-[20%]"
         variants={container}
         initial="hidden"
         animate="visible"

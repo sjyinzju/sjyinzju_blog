@@ -1,30 +1,33 @@
 from datetime import datetime, timedelta, timezone
 
+import bcrypt
 from jose import jwt
-from passlib.context import CryptContext
 
 from core.config import settings
 
 # ═══════════════════════════════════════════════════════════════════════
-#  Password hashing — bcrypt via passlib
+#  Password hashing — bcrypt
 # ═══════════════════════════════════════════════════════════════════════
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def get_password_hash(password: str) -> str:
     """对明文密码进行 bcrypt 哈希，返回可直接存入数据库的 hash 字符串。"""
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(
+        password.encode("utf-8"), bcrypt.gensalt()
+    ).decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """校验明文密码与数据库中存储的 hash 是否匹配。"""
-    return pwd_context.verify(plain_password, hashed_password)
+    return bcrypt.checkpw(
+        plain_password.encode("utf-8"), hashed_password.encode("utf-8")
+    )
 
 
 # ═══════════════════════════════════════════════════════════════════════
 #  JWT — 双 Token 无感刷新
 # ═══════════════════════════════════════════════════════════════════════
+
 
 def create_access_token(data: dict) -> str:
     """签发短期访问令牌。

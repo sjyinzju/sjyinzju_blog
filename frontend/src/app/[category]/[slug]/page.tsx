@@ -1,5 +1,6 @@
 import { getPost } from "@/lib/api";
 import ArticleContent from "@/components/ArticleContent";
+import MarkdownViewer from "@/components/MarkdownViewer";
 import NotFound from "@/app/not-found";
 
 export const dynamic = "force-dynamic";
@@ -19,5 +20,9 @@ export default async function CategoryPostPage({
   }
 
   if (!post) return <NotFound />;
-  return <ArticleContent post={post} />;
+  return (
+    <ArticleContent post={post}>
+      <MarkdownViewer content={post.content} />
+    </ArticleContent>
+  );
 }

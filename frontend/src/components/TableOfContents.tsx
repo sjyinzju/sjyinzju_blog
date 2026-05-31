@@ -39,7 +39,7 @@ export default function TableOfContents({ markdown }: { markdown: string }) {
         <a
           key={entry.id}
           href={`#${entry.id}`}
-          className={`block text-sm leading-relaxed text-[#888] hover:text-[#FF4A00] transition-colors duration-200 truncate ${
+          className={`block text-sm leading-relaxed text-[#888] hover:text-[#FF4A00] transition-colors duration-300 whitespace-normal break-words ${
             entry.level === 1
               ? ""
               : entry.level === 2

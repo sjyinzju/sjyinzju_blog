@@ -20,8 +20,8 @@ const alignMap: Record<string, "left" | "right"> = {
 };
 
 const descriptions: Record<string, React.ReactNode> = {
-  "笔记": <>这里记录着系统性的笔记与学习心得。从<HighlightText delay={0.8}>前端工程化</HighlightText>到后端架构，从算法思维到系统设计。</>,
-  "思考": <>技术之外，我热衷于思考<HighlightText delay={0.8}>产品与人的关系</HighlightText>。好的产品不只是代码的堆砌，而是对用户行为的深刻理解。</>,
+  "笔记": <>这里记录着<HighlightText delay={0.8}>系统性的知识笔记</HighlightText>与学习心得。</>,
+  "思考": <>我热衷于思考，凡事多问问<HighlightText delay={0.8}>为什么、怎么办</HighlightText>。</>,
   "视频": <>用影像记录创作的过程。从<HighlightText delay={0.8}>教程录制</HighlightText>到 Vlog 拍摄，从剪辑技巧到内容策划。</>,
   "项目开发": <>从 0 到 1 构建产品的全过程。涵盖<HighlightText delay={0.8}>全栈开发</HighlightText>、性能优化、部署运维。</>,
   "灵感": <>收集那些一闪而过的<HighlightText delay={0.8}>创意火花</HighlightText>。好的灵感往往来源于跨界的碰撞。</>,

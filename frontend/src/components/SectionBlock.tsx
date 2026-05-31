@@ -33,7 +33,7 @@ export default function SectionBlock({ title, content, align, href }: Props) {
   return (
     <section
       ref={ref}
-      className={`min-h-[40vh] flex items-center max-w-4xl mx-auto px-8 py-6 gap-6 ${
+      className={`min-h-[25vh] flex items-center max-w-4xl mx-auto px-8 py-4 gap-4 ${
         isLeft ? "flex-row" : "flex-row-reverse"
       }`}
     >
@@ -41,13 +41,13 @@ export default function SectionBlock({ title, content, align, href }: Props) {
       <div className="w-10 flex-shrink-0 flex justify-center">
         <svg
           width="2"
-          height="200"
-          viewBox="0 0 2 200"
+          height="120"
+          viewBox="0 0 2 120"
           fill="none"
           className="overflow-visible"
         >
           <motion.path
-            d="M 1 0 C 0 35, 2 70, 1 100 C 0 130, 2 165, 1 200"
+            d="M 1 0 C 0 20, 2 40, 1 60 C 0 80, 2 100, 1 120"
             stroke="#FF4A00"
             strokeWidth="1.5"
             strokeLinecap="round"

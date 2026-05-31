@@ -124,6 +124,21 @@ def build_payload(md_file: Path, folder_name: str) -> dict | None:
     return payload
 
 
+def fetch_existing_slugs() -> set[str]:
+    """从后端拉取已有文章的 slug 集合，用于去重检查"""
+    try:
+        resp = requests.get(API_URL, timeout=15)
+        if resp.status_code == 200:
+            posts = resp.json()
+            return {p["slug"] for p in posts if isinstance(p, dict) and "slug" in p}
+        else:
+            print(f"[警告] 无法获取已有文章列表 (HTTP {resp.status_code})，将尝试上传所有文章")
+            return set()
+    except Exception as e:
+        print(f"[警告] 获取已有文章列表失败: {e}，将尝试上传所有文章")
+        return set()
+
+
 def sync(dry_run: bool = False) -> tuple[int, int]:
     """
     遍历 CONTENT_DIR，上传所有 .md 文件。
@@ -133,10 +148,16 @@ def sync(dry_run: bool = False) -> tuple[int, int]:
     content_path = Path(CONTENT_DIR)
     if not content_path.exists():
         print(f"[致命] 内容目录不存在: {CONTENT_DIR}")
-        return 0, 1
+        return 0, 1, 0
 
     success_count = 0
     fail_count = 0
+    skip_count = 0
+
+    # 预加载已有文章 slug 集合
+    print("[检查] 正在获取已有文章列表...")
+    existing_slugs = fetch_existing_slugs()
+    print(f"[检查] 后端已有 {len(existing_slugs)} 篇文章\n")
 
     # 遍历子文件夹
     for folder in sorted(content_path.iterdir()):
@@ -164,6 +185,12 @@ def sync(dry_run: bool = False) -> tuple[int, int]:
             payload = build_payload(md_file, folder_name)
             if payload is None:
                 fail_count += 1
+                continue
+
+            # 检查是否已存在
+            if payload["slug"] in existing_slugs:
+                print("→ ⏭️  已存在，跳过")
+                skip_count += 1
                 continue
 
             if dry_run:
@@ -201,7 +228,7 @@ def sync(dry_run: bool = False) -> tuple[int, int]:
 
             except requests.exceptions.ConnectionError:
                 print(f"→ ❌ 无法连接后端 ({API_URL})，请确认服务已启动")
-                return success_count, fail_count + 1
+                return success_count, fail_count + 1, skip_count
             except requests.exceptions.Timeout:
                 print(f"→ ❌ 请求超时")
                 fail_count += 1
@@ -209,7 +236,7 @@ def sync(dry_run: bool = False) -> tuple[int, int]:
                 print(f"→ ❌ {e}")
                 fail_count += 1
 
-    return success_count, fail_count
+    return success_count, fail_count, skip_count
 
 
 # ── 入口 ──────────────────────────────────────────────────
@@ -231,9 +258,9 @@ if __name__ == "__main__":
         print("  模式: DRY-RUN（仅预览）")
     print("=" * 60)
 
-    ok, bad = sync(dry_run=args.dry_run)
+    ok, bad, skipped = sync(dry_run=args.dry_run)
 
     print(f"\n{'─' * 60}")
-    print(f"完成: ✅ {ok} 篇成功, ❌ {bad} 篇失败")
+    print(f"完成: ✅ {ok} 篇新增, ⏭️  {skipped} 篇已存在, ❌ {bad} 篇失败")
     if args.dry_run:
         print("（本次为 dry-run，未实际发送任何请求）")
