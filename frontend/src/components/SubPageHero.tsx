@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 
-export default function SubPageHero({ title, image, imageClassName, imagePositionClass, clipImage }: { title: string; image?: string; imageClassName?: string; imagePositionClass?: string; clipImage?: boolean | number }) {
+export default function SubPageHero({ title, subtitle, image, imageClassName, imagePositionClass, clipImage }: { title: string; subtitle?: string; image?: string; imageClassName?: string; imagePositionClass?: string; clipImage?: boolean | number }) {
   const partialRight = typeof clipImage === "number" ? clipImage : 0;
   return (
     <section className="relative h-[60vh] overflow-hidden pt-16">
@@ -95,6 +95,9 @@ export default function SubPageHero({ title, image, imageClassName, imagePositio
         <h1 className="text-4xl md:text-6xl font-bold tracking-wide text-[#FF4A00]">
           {title}
         </h1>
+        {subtitle && (
+          <p className="mt-4 ml-[0.5vw] text-base text-[#666] tracking-[0.15em]">{subtitle}</p>
+        )}
       </motion.div>
     </section>
   );
