@@ -2,11 +2,15 @@
 Local-first CMS 同步脚本
 
 遍历 CONTENT_DIR 下的分类子文件夹，解析 Markdown + YAML Frontmatter，
-通过 POST /posts/ 上传至 FastAPI 后端。
+通过 POST /posts/ 上传至 FastAPI 后端（需管理员身份）。
 
 用法：
-    python sync_posts.py            # 扫描并上传所有文章（已存在的会 400，跳过）
+    python sync_posts.py            # 扫描并上传所有文章（已存在的会跳过）
     python sync_posts.py --dry-run  # 仅打印将要上传的内容，不实际发送
+
+鉴权：
+    从 backend/.env 读取 ADMIN_EMAIL，密码优先读 BLOG_ADMIN_PASSWORD
+    环境变量，否则交互式输入。
 """
 
 import os
@@ -16,12 +20,40 @@ import argparse
 from pathlib import Path
 from datetime import datetime
 
+from dotenv import load_dotenv
 import frontmatter
 import requests
 
+# ── 加载 backend/.env ─────────────────────────────────────
+_script_dir = Path(__file__).resolve().parent
+_backend_dir = _script_dir.parent / "backend"
+_env_path = _backend_dir / ".env"
+
+if _env_path.exists():
+    load_dotenv(_env_path)
+else:
+    print(f"[错误] 未找到 .env 文件（预期路径: {_env_path}）")
+    sys.exit(1)
+
 # ── 常量配置 ──────────────────────────────────────────────
 CONTENT_DIR = "E:/backend_database"
-API_URL = "http://127.0.0.1:8000/posts/"
+API_BASE = "http://127.0.0.1:8000"
+API_URL = f"{API_BASE}/posts/"
+
+# 管理员凭据（从 .env 读取，不上传至 Git）
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "")
+if not ADMIN_EMAIL:
+    print("[错误] 请在 .env 文件中配置 ADMIN_EMAIL")
+    sys.exit(1)
+
+
+def _get_password() -> str:
+    """优先读环境变量，否则交互式输入（输一次管整个脚本运行周期）。"""
+    pw = os.getenv("BLOG_ADMIN_PASSWORD", "")
+    if pw:
+        return pw
+    import getpass
+    return getpass.getpass(f"请输入 {ADMIN_EMAIL} 的密码: ")
 
 # 子文件夹名 → 对应的 tag（与前端 TAG_ROUTE_MAP 对齐）
 FOLDER_TO_TAG: dict[str, str] = {
@@ -124,10 +156,36 @@ def build_payload(md_file: Path, folder_name: str) -> dict | None:
     return payload
 
 
-def fetch_existing_slugs() -> set[str]:
+def login(session: requests.Session) -> bool:
+    """管理员登录，获取 Cookie 存入 session。返回是否成功。"""
+    password = _get_password()
+    if not password:
+        print("[错误] 密码为空，已取消。")
+        return False
+
+    print(f"[鉴权] 正在以 {ADMIN_EMAIL} 身份登录...")
+    try:
+        resp = session.post(
+            f"{API_BASE}/auth/login",
+            json={"email": ADMIN_EMAIL, "password": password},
+            timeout=15,
+        )
+        if resp.status_code == 200:
+            print(f"[鉴权] 登录成功")
+            return True
+        else:
+            detail = resp.json().get("detail", resp.text)
+            print(f"[错误] 登录失败 ({resp.status_code}): {detail}")
+            return False
+    except requests.exceptions.ConnectionError:
+        print(f"[错误] 无法连接后端 ({API_BASE})，请确认服务已启动")
+        return False
+
+
+def fetch_existing_slugs(session: requests.Session) -> set[str]:
     """从后端拉取已有文章的 slug 集合，用于去重检查"""
     try:
-        resp = requests.get(API_URL, timeout=15)
+        resp = session.get(API_URL, timeout=15)
         if resp.status_code == 200:
             posts = resp.json()
             return {p["slug"] for p in posts if isinstance(p, dict) and "slug" in p}
@@ -139,15 +197,20 @@ def fetch_existing_slugs() -> set[str]:
         return set()
 
 
-def sync(dry_run: bool = False) -> tuple[int, int]:
+def sync(dry_run: bool = False) -> tuple[int, int, int]:
     """
     遍历 CONTENT_DIR，上传所有 .md 文件。
 
-    返回 (成功数, 失败数)
+    返回 (成功数, 失败数, 跳过数)
     """
     content_path = Path(CONTENT_DIR)
     if not content_path.exists():
         print(f"[致命] 内容目录不存在: {CONTENT_DIR}")
+        return 0, 1, 0
+
+    # ── 登录 ──
+    session = requests.Session()
+    if not login(session):
         return 0, 1, 0
 
     success_count = 0
@@ -155,8 +218,8 @@ def sync(dry_run: bool = False) -> tuple[int, int]:
     skip_count = 0
 
     # 预加载已有文章 slug 集合
-    print("[检查] 正在获取已有文章列表...")
-    existing_slugs = fetch_existing_slugs()
+    print("\n[检查] 正在获取已有文章列表...")
+    existing_slugs = fetch_existing_slugs(session)
     print(f"[检查] 后端已有 {len(existing_slugs)} 篇文章\n")
 
     # 遍历子文件夹
@@ -203,11 +266,10 @@ def sync(dry_run: bool = False) -> tuple[int, int]:
                 continue
 
             try:
-                resp = requests.post(
+                resp = session.post(
                     API_URL,
                     json=payload,
                     timeout=30,
-                    headers={"Content-Type": "application/json"},
                 )
 
                 if resp.status_code in (200, 201):
