@@ -14,7 +14,7 @@ from core.security import (
     verify_password,
 )
 from models.user import User
-from schemas.user import UserCreate, UserLogin, UserOut
+from schemas.user import PasswordChange, UserCreate, UserLogin, UserOut, UserUpdate
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -152,3 +152,43 @@ def refresh(request: Request, response: Response, db: Session = Depends(get_db))
 def me(current_user: User = Depends(get_current_user)):
     """返回当前登录用户的信息（需携带有效 access_token Cookie）。"""
     return current_user
+
+
+@router.put("/me", response_model=UserOut)
+def update_me(
+    data: UserUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """更新当前用户的个人资料（仅更新传入的字段）。"""
+    update_data = data.model_dump(exclude_unset=True)
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+
+    # 如果修改了 username，检查是否已被人占用
+    if "username" in update_data and update_data["username"] != current_user.username:
+        existing = db.query(User).filter(User.username == update_data["username"]).first()
+        if existing:
+            raise HTTPException(status_code=409, detail="Username already taken")
+
+    for field, value in update_data.items():
+        setattr(current_user, field, value)
+
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+@router.put("/password")
+def change_password(
+    data: PasswordChange,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """修改密码（需验证旧密码）。"""
+    if not verify_password(data.old_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Incorrect old password")
+
+    current_user.hashed_password = get_password_hash(data.new_password)
+    db.commit()
+    return {"msg": "Password changed successfully"}
