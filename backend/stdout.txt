@@ -1,0 +1,11 @@
+INFO:     127.0.0.1:60132 - "POST /auth/register HTTP/1.1" 201 Created
+INFO:     127.0.0.1:56121 - "POST /auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56729 - "GET /posts/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49675 - "GET /posts/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53961 - "GET /posts/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53961 - "GET /posts/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50885 - "GET /posts/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50885 - "GET /posts/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64459 - "GET /posts/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57358 - "GET /posts/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62087 - "GET /posts/ HTTP/1.1" 200 OK
