@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile, status
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
@@ -14,7 +14,8 @@ from core.security import (
     verify_password,
 )
 from models.user import User
-from schemas.user import PasswordChange, UserCreate, UserLogin, UserOut, UserUpdate
+from schemas.user import PasswordChange, UserCreate, UserLogin, UserOut
+from utils.storage import upload_file_to_s3
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -155,24 +156,43 @@ def me(current_user: User = Depends(get_current_user)):
 
 
 @router.put("/me", response_model=UserOut)
-def update_me(
-    data: UserUpdate,
+async def update_me(
+    username: str | None = Form(None),
+    avatar: str | None = Form(None),
+    bio: str | None = Form(None),
+    website: str | None = Form(None),
+    avatar_file: UploadFile | None = File(None),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """更新当前用户的个人资料（仅更新传入的字段）。"""
-    update_data = data.model_dump(exclude_unset=True)
-    if not update_data:
-        raise HTTPException(status_code=400, detail="No fields to update")
+    """更新当前用户的个人资料。
 
-    # 如果修改了 username，检查是否已被人占用
-    if "username" in update_data and update_data["username"] != current_user.username:
-        existing = db.query(User).filter(User.username == update_data["username"]).first()
+    头像可通过两种方式更新：
+    - ``avatar`` form 字段：直接传 URL 字符串
+    - ``avatar_file`` 文件上传：上传到 S3 后使用返回的 URL（优先级更高）
+    """
+    # 处理头像文件上传
+    if avatar_file is not None and avatar_file.filename:
+        contents = await avatar_file.read()
+        avatar_url = upload_file_to_s3(
+            contents, avatar_file.filename, avatar_file.content_type or "image/png"
+        )
+        current_user.avatar = avatar_url
+    elif avatar is not None:
+        current_user.avatar = avatar
+
+    # 更新其他字段
+    if username is not None and username != current_user.username:
+        existing = db.query(User).filter(User.username == username).first()
         if existing:
             raise HTTPException(status_code=409, detail="Username already taken")
+        current_user.username = username
 
-    for field, value in update_data.items():
-        setattr(current_user, field, value)
+    if bio is not None:
+        current_user.bio = bio
+
+    if website is not None:
+        current_user.website = website
 
     db.commit()
     db.refresh(current_user)
