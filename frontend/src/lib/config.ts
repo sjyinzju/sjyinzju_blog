@@ -3,7 +3,6 @@ export const TAG_ROUTE_MAP: Record<string, string> = {
   "思考": "thoughts",
   "视频": "videos",
   "项目开发": "projects",
-  "灵感与分享": "inspiration",
   "灵感": "inspiration",
   "资源": "resources",
   "关于": "about",
