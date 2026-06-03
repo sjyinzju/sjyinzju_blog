@@ -127,14 +127,18 @@ export default function InteractiveGrid({ className }: { className?: string }) {
     rafRef.current = requestAnimationFrame(animate);
 
     window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("resize", onResize);
+
+    // ResizeObserver 监听父容器尺寸变化（内容加载后高度增加也能自适应）
+    const parent = canvas.parentElement;
+    const resizeObserver = parent ? new ResizeObserver(() => onResize()) : null;
+    if (resizeObserver && parent) resizeObserver.observe(parent);
 
     return () => {
       mountedRef.current = false;
       clearTimeout(initTimer);
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("resize", onResize);
+      if (resizeObserver) resizeObserver.disconnect();
     };
   }, [onMouseMove, onResize]);
 

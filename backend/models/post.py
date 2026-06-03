@@ -15,7 +15,8 @@ class Post(Base):
     slug: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     content: Mapped[str] = mapped_column(Text)
     summary: Mapped[str] = mapped_column(String(500))
-    tags: Mapped[list[str]] = mapped_column(ARRAY(String))
+    categories: Mapped[list[str]] = mapped_column(ARRAY(String))
+    tags: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
     is_published: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()

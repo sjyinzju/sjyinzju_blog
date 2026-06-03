@@ -17,7 +17,9 @@ export default function PublishPage() {
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [summary, setSummary] = useState("");
-  const [tags, setTags] = useState("");
+  const [categories, setCategories] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const [content, setContent] = useState("");
   const [isPublished, setIsPublished] = useState(true);
   const [error, setError] = useState("");
@@ -41,7 +43,7 @@ export default function PublishPage() {
       return;
     }
 
-    const tagList = tags
+    const catList = categories
       .split(/[,，]/)
       .map((t) => t.trim())
       .filter(Boolean);
@@ -56,7 +58,8 @@ export default function PublishPage() {
           slug,
           summary,
           content,
-          tags: tagList,
+          categories: catList,
+          tags: tags,
           is_published: isPublished,
         }),
       });
@@ -66,7 +69,9 @@ export default function PublishPage() {
         setTitle("");
         setSlug("");
         setSummary("");
-        setTags("");
+        setCategories("");
+        setTags([]);
+        setTagInput("");
         setContent("");
         setIsPublished(true);
       } else {
@@ -144,6 +149,56 @@ export default function PublishPage() {
             />
           </FieldRow>
 
+          <FieldRow label="分类" fieldName="分类">
+            <input
+              type="text"
+              className={inputClass}
+              placeholder="笔记, 思考, 灵感, 资源"
+              value={categories}
+              onChange={(e) => setCategories(e.target.value)}
+            />
+          </FieldRow>
+
+          <FieldRow label="标签" fieldName="Tags">
+            <div className="space-y-2">
+              {/* 已添加的标签 */}
+              <div className="flex flex-wrap gap-2 min-h-[28px]">
+                {tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="group relative inline-flex items-center px-2.5 py-0.5 text-sm tracking-wide text-[#1a1a1a] bg-[#f0ece5] rounded-sm cursor-default"
+                  >
+                    {tag}
+                    <button
+                      onClick={() => setTags(tags.filter((t) => t !== tag))}
+                      className="ml-1.5 text-[#bbb] hover:text-[#FF4A00] opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+              {/* 输入行 */}
+              <input
+                type="text"
+                className={inputClass}
+                placeholder="输入标签，按回车添加"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    const val = tagInput.trim();
+                    if (val && !tags.includes(val)) {
+                      setTags([...tags, val]);
+                      setTagInput("");
+                    }
+                  }
+                }}
+              />
+            </div>
+          </FieldRow>
+
           <FieldRow label="摘要" fieldName="摘要">
             <textarea
               className={inputClass}
@@ -151,16 +206,6 @@ export default function PublishPage() {
               placeholder="简短描述..."
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
-            />
-          </FieldRow>
-
-          <FieldRow label="标签" fieldName="标签">
-            <input
-              type="text"
-              className={inputClass}
-              placeholder="笔记, 教程"
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
             />
           </FieldRow>
 

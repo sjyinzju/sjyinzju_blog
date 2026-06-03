@@ -10,6 +10,7 @@ class PostCreate(BaseModel):
     slug: str
     content: str
     summary: str
+    categories: list[str] = []
     tags: list[str] = []
     is_published: bool = True
 
@@ -21,6 +22,7 @@ class PostUpdate(BaseModel):
     slug: str | None = None
     content: str | None = None
     summary: str | None = None
+    categories: list[str] | None = None
     tags: list[str] | None = None
     is_published: bool | None = None
 
@@ -35,6 +37,7 @@ class PostResponse(BaseModel):
     slug: str
     content: str
     summary: str
+    categories: list[str]
     tags: list[str]
     is_published: bool
     created_at: datetime

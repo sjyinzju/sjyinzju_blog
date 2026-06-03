@@ -33,7 +33,8 @@ export default function SubPageContent({
             title={post.title}
             summary={post.summary}
             date={post.created_at}
-            href={`/${getCategoryUrl(post.tags[0])}/${post.slug}`}
+            tags={post.tags}
+            href={`/${getCategoryUrl(post.categories[0])}/${post.slug}`}
           />
         ))}
         {posts.length === 0 && (

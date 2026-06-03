@@ -120,14 +120,14 @@ def build_payload(md_file: Path, folder_name: str) -> dict | None:
         summary = plain[:200]
         print(f"  [警告] {md_file.name} 缺少 summary，降级使用正文前 200 字")
 
-    # --- tags ---
-    tags: list[str] = meta.get("tags", [])
-    if not isinstance(tags, list):
-        tags = [str(tags)]
+    # --- categories ---
+    categories: list[str] = meta.get("categories", [])
+    if not isinstance(categories, list):
+        categories = [str(categories)]
     # 自动注入文件夹对应的分类 tag
     category_tag = FOLDER_TO_TAG.get(folder_name, folder_name)
-    if category_tag not in tags:
-        tags.insert(0, category_tag)
+    if category_tag not in categories:
+        categories.insert(0, category_tag)
 
     # --- date (可选，存为自定义字段或忽略；API 自动生成 created_at) ---
     # 如果 frontmatter 中有 date，可在 summary 前面追加日期信息以供参考
@@ -149,7 +149,7 @@ def build_payload(md_file: Path, folder_name: str) -> dict | None:
         "slug": slug,
         "content": content,
         "summary": summary,
-        "tags": tags,
+        "categories": categories,
         "is_published": bool(is_published),
     }
 
@@ -260,7 +260,7 @@ def sync(dry_run: bool = False) -> tuple[int, int, int]:
                 print("→ [DRY-RUN]")
                 print(f"     title:   {payload['title']}")
                 print(f"     slug:    {payload['slug']}")
-                print(f"     tags:    {payload['tags']}")
+                print(f"     categories:    {payload['categories']}")
                 print(f"     summary: {payload['summary'][:60]}...")
                 success_count += 1
                 continue

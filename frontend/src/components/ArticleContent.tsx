@@ -7,8 +7,8 @@ import Link from "next/link";
 import TableOfContents from "./TableOfContents";
 
 export default function ArticleContent({ post, children }: { post: Post; children: React.ReactNode }) {
-  const backHref = post.tags.length > 0
-    ? `/${getCategoryUrl(post.tags[0])}`
+  const backHref = post.categories.length > 0
+    ? `/${getCategoryUrl(post.categories[0])}`
     : "/";
 
   const hasHeadings = /^#{1,6}\s+/m.test(post.content);

@@ -48,6 +48,7 @@ interface PostListItemProps {
   externalUrl?: string;
   stars?: number;
   language?: string | null;
+  tags?: string[];
 }
 
 export default function PostListItem({
@@ -58,6 +59,7 @@ export default function PostListItem({
   externalUrl,
   stars,
   language,
+  tags,
 }: PostListItemProps) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-5% 0px" });
@@ -105,6 +107,18 @@ export default function PostListItem({
             <p className="text-base leading-relaxed tracking-wide text-[#888] mt-1 line-clamp-2">
               {summary}
             </p>
+          )}
+          {tags && tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center px-2.5 py-0.5 text-xs tracking-wide text-[#888] bg-[#f0ece5] rounded-sm"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           )}
         </div>
 
