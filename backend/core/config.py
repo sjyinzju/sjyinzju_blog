@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     S3_ACCESS_KEY: str = "admin"
     S3_SECRET_KEY: str = "password123"
     S3_BUCKET_NAME: str = "avatars"
+    SECURE_COOKIES: bool = False
 
     class Config:
         env_file = ".env"

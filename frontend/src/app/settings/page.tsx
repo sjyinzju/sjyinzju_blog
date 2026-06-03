@@ -6,8 +6,7 @@ import InteractiveGrid from "@/components/InteractiveGrid";
 import FormPageHero from "@/components/FormPageHero";
 import FieldRow from "@/components/FieldRow";
 import type { User } from "@/types/user";
-
-const API_BASE = "http://localhost:8000";
+import { apiFetch } from "@/lib/fetch";
 
 const inputClass =
   "w-full text-base tracking-wide text-[#1a1a1a] bg-transparent border-0 border-b border-[#ddd] rounded-none py-1.5 placeholder:text-[#ccc] focus:outline-none focus:border-[#FF4A00] transition-colors duration-200";
@@ -34,7 +33,7 @@ export default function SettingsPage() {
   const [pwdLoading, setPwdLoading] = useState(false);
 
   useEffect(() => {
-    fetch(`${API_BASE}/auth/me`, { credentials: "include" })
+    apiFetch("/auth/me")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         setUser(data);
@@ -66,9 +65,8 @@ export default function SettingsPage() {
         formData.append("avatar", avatar);
       }
 
-      const res = await fetch(`${API_BASE}/auth/me`, {
+      const res = await apiFetch("/auth/me", {
         method: "PUT",
-        credentials: "include",
         body: formData,
       });
       if (res.ok) {
@@ -101,10 +99,9 @@ export default function SettingsPage() {
 
     setPwdLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/auth/password`, {
+      const res = await apiFetch("/auth/password", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
       });
       if (res.ok) {

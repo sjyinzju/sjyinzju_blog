@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import type { User } from "@/types/user";
+import { apiFetch } from "@/lib/fetch";
 
 const navItems = [
   { label: "笔记", href: "/notes" },
@@ -44,7 +45,7 @@ export default function Navbar() {
   const [user, setUser] = useState<User | null | undefined>(undefined);
 
   useEffect(() => {
-    fetch(`${API_BASE}/auth/me`, { credentials: "include" })
+    apiFetch("/auth/me")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => setUser(data))
       .catch(() => setUser(null));

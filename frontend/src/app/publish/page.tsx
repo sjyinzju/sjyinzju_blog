@@ -6,8 +6,7 @@ import InteractiveGrid from "@/components/InteractiveGrid";
 import FormPageHero from "@/components/FormPageHero";
 import FieldRow from "@/components/FieldRow";
 import type { User } from "@/types/user";
-
-const API_BASE = "http://localhost:8000";
+import { apiFetch } from "@/lib/fetch";
 
 const inputClass =
   "w-full text-base tracking-wide text-[#1a1a1a] bg-transparent border-0 border-b border-[#ddd] rounded-none py-1.5 placeholder:text-[#ccc] focus:outline-none focus:border-[#FF4A00] transition-colors duration-200";
@@ -26,7 +25,7 @@ export default function PublishPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch(`${API_BASE}/auth/me`, { credentials: "include" })
+    apiFetch("/auth/me")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => setUser(data))
       .catch(() => setUser(null));
@@ -49,10 +48,9 @@ export default function PublishPage() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/posts/`, {
+      const res = await apiFetch("/posts/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({
           title,
           slug,

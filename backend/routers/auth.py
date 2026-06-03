@@ -20,6 +20,28 @@ from utils.storage import upload_file_to_s3
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
+def _set_auth_cookies(response: Response, access_token: str, refresh_token: str):
+    """统一写入双 HttpOnly Cookie，上线时在 .env 设 SECURE_COOKIES=true。"""
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        samesite="lax",
+        secure=settings.SECURE_COOKIES,
+        path="/",
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+    )
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        samesite="lax",
+        secure=settings.SECURE_COOKIES,
+        path="/",
+        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
+    )
+
+
 @router.post(
     "/register",
     response_model=UserOut,
@@ -58,23 +80,7 @@ def login(data: UserLogin, response: Response, db: Session = Depends(get_db)):
     access_token = create_access_token(token_data)
     refresh_token = create_refresh_token(token_data)
 
-    # ── 写入 Cookie ──
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        httponly=True,
-        samesite="lax",
-        path="/",
-        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-    )
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        httponly=True,
-        samesite="lax",
-        path="/",
-        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
-    )
+    _set_auth_cookies(response, access_token, refresh_token)
 
     # ── 更新最近登录时间 ──
     user.last_login_at = datetime.now(timezone.utc)
@@ -86,10 +92,11 @@ def login(data: UserLogin, response: Response, db: Session = Depends(get_db)):
 
 @router.post("/refresh")
 def refresh(request: Request, response: Response, db: Session = Depends(get_db)):
-    """用 refresh_token（HttpOnly Cookie）换取新的 access_token。
+    """滚动刷新：验证 refresh_token，签发全新的 access_token + refresh_token。
 
     - 无 cookie / 解码失败 / type 非 "refresh" → 401
     - 用户不存在 / 已封禁 → 401 / 403
+    - 成功后 refresh_token 有效期重新从 7 天开始计算
     """
     token = request.cookies.get("refresh_token")
     if not token:
@@ -135,16 +142,12 @@ def refresh(request: Request, response: Response, db: Session = Depends(get_db))
             detail="Account is disabled",
         )
 
-    # ── 签发新 access_token ──
-    new_access_token = create_access_token({"sub": str(user.id)})
-    response.set_cookie(
-        key="access_token",
-        value=new_access_token,
-        httponly=True,
-        samesite="lax",
-        path="/",
-        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-    )
+    # ── 滚动签发：同时更新 access_token 和 refresh_token ──
+    token_data = {"sub": str(user.id)}
+    new_access_token = create_access_token(token_data)
+    new_refresh_token = create_refresh_token(token_data)
+
+    _set_auth_cookies(response, new_access_token, new_refresh_token)
 
     return {"msg": "Token refreshed"}
 
