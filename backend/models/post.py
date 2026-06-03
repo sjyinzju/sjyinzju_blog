@@ -17,6 +17,7 @@ class Post(Base):
     summary: Mapped[str] = mapped_column(String(500))
     categories: Mapped[list[str]] = mapped_column(ARRAY(String))
     tags: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
+    internal_links: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
     is_published: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()

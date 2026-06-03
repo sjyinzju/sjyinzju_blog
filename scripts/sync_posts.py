@@ -14,6 +14,7 @@ Local-first CMS 同步脚本
 """
 
 import os
+import re
 import sys
 import json
 import argparse
@@ -100,6 +101,15 @@ def build_payload(md_file: Path, folder_name: str) -> dict | None:
     meta: dict = post.metadata or {}
     content: str = post.content or ""
 
+    # --- internal_links：提取 Obsidian 双向链接 [[...]] ---
+    raw_links: list[str] = re.findall(r"\[\[(.*?)\]\]", content)
+    internal_links: list[str] = []
+    for link in raw_links:
+        # 去除别名：[[文章名|别名]] → 文章名
+        target = link.split("|")[0].strip()
+        if target:
+            internal_links.append(target)
+
     # --- title ---
     title = meta.get("title", "").strip()
     if not title:
@@ -150,6 +160,7 @@ def build_payload(md_file: Path, folder_name: str) -> dict | None:
         "content": content,
         "summary": summary,
         "categories": categories,
+        "internal_links": internal_links,
         "is_published": bool(is_published),
     }
 
@@ -261,6 +272,7 @@ def sync(dry_run: bool = False) -> tuple[int, int, int]:
                 print(f"     title:   {payload['title']}")
                 print(f"     slug:    {payload['slug']}")
                 print(f"     categories:    {payload['categories']}")
+                print(f"     internal_links: {payload['internal_links']}")
                 print(f"     summary: {payload['summary'][:60]}...")
                 success_count += 1
                 continue

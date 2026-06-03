@@ -9,6 +9,7 @@ from core.deps import get_current_admin
 from models.post import Post
 from models.user import User
 from schemas.post import PostCreate, PostResponse, PostUpdate
+from schemas.social import GraphData, GraphLink, GraphNode
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -51,6 +52,74 @@ def top_tags(limit: int = Query(5, ge=1, le=20), db: Session = Depends(get_db)):
             for tag in tags:
                 counter[tag] += 1
     return [{"tag": tag, "count": count} for tag, count in counter.most_common(limit)]
+
+
+# 有效分类（与前端子页面对应）
+VALID_CATEGORIES = {"笔记", "思考", "灵感", "资源"}
+
+@router.get("/graph", response_model=GraphData)
+def post_graph(db: Session = Depends(get_db)):
+    """生成博客知识图谱：分类 → 标签 → 文章 的力导向图数据。"""
+    posts = db.query(Post).filter(Post.is_published == True).all()
+
+    nodes: dict[str, GraphNode] = {}
+    links: list[GraphLink] = []
+
+    # Build slug→id lookup for internal_links resolution
+    slug_to_id: dict[str, str] = {}
+
+    for post in posts:
+        article_id = f"article:{post.slug}"
+
+        # ── 文章节点 ──
+        if article_id not in nodes:
+            nodes[article_id] = GraphNode(
+                id=article_id,
+                label=post.title,
+                group="article",
+                val=5,
+                slug=post.slug,
+            )
+        slug_to_id[post.slug] = article_id
+
+        # ── 分类节点（仅有效分类，类型内去重） ──
+        for cat in post.categories:
+            if cat not in VALID_CATEGORIES:
+                continue
+            cat_id = f"category:{cat}"
+            if cat_id not in nodes:
+                nodes[cat_id] = GraphNode(
+                    id=cat_id, label=cat, group="category", val=12
+                )
+            links.append(GraphLink(source=cat_id, target=article_id))
+
+        # ── 标签节点（类型内去重） ──
+        for tag in post.tags:
+            tag_id = f"tag:{tag}"
+            if tag_id not in nodes:
+                nodes[tag_id] = GraphNode(
+                    id=tag_id, label=tag, group="tag", val=8
+                )
+            links.append(GraphLink(source=tag_id, target=article_id))
+
+    # ── 双向链接连线（文章 → 文章） ──
+    for post in posts:
+        article_id = f"article:{post.slug}"
+        for target_slug in post.internal_links:
+            target_id = slug_to_id.get(target_slug)
+            if target_id and target_id != article_id:
+                links.append(GraphLink(source=article_id, target=target_id))
+
+    # 去重 links
+    seen = set()
+    unique_links: list[GraphLink] = []
+    for link in links:
+        key = (link.source, link.target)
+        if key not in seen:
+            seen.add(key)
+            unique_links.append(link)
+
+    return GraphData(nodes=list(nodes.values()), links=unique_links)
 
 
 @router.get("/{slug}", response_model=PostResponse)

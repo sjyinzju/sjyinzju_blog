@@ -48,3 +48,24 @@ class LikeStatus(BaseModel):
     """当前用户对某篇文章的点赞状态。"""
     liked: bool
     count: int
+
+
+# ═══════ 知识图谱 ═══════
+
+
+class GraphNode(BaseModel):
+    id: str
+    label: str
+    group: str       # "category" | "tag" | "article"
+    val: int         # 节点大小
+    slug: str = ""   # 仅 article 节点携带，用于前端跳转
+
+
+class GraphLink(BaseModel):
+    source: str   # 起点节点 id
+    target: str   # 终点节点 id
+
+
+class GraphData(BaseModel):
+    nodes: list[GraphNode]
+    links: list[GraphLink]

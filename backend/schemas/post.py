@@ -12,6 +12,7 @@ class PostCreate(BaseModel):
     summary: str
     categories: list[str] = []
     tags: list[str] = []
+    internal_links: list[str] = []
     is_published: bool = True
 
 
@@ -24,6 +25,7 @@ class PostUpdate(BaseModel):
     summary: str | None = None
     categories: list[str] | None = None
     tags: list[str] | None = None
+    internal_links: list[str] | None = None
     is_published: bool | None = None
 
 
@@ -39,5 +41,6 @@ class PostResponse(BaseModel):
     summary: str
     categories: list[str]
     tags: list[str]
+    internal_links: list[str]
     is_published: bool
     created_at: datetime

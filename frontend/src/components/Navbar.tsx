@@ -16,6 +16,7 @@ const navItems = [
   { label: "灵感", href: "/inspiration" },
   { label: "资源", href: "/resources" },
   { label: "关于", href: "/about" },
+  { label: "连接", href: "/connections" },
 ];
 
 const API_BASE = "http://localhost:8000";
