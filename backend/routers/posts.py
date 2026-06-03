@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from collections import Counter
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import cast, or_, String
 from sqlalchemy.orm import Session
 
 from core.database import get_db
@@ -16,6 +19,38 @@ router = APIRouter(prefix="/posts", tags=["posts"])
 @router.get("/", response_model=list[PostResponse])
 def list_posts(db: Session = Depends(get_db)):
     return db.query(Post).filter(Post.is_published == True).all()
+
+
+@router.get("/search", response_model=list[PostResponse])
+def search_posts(q: str = Query(""), db: Session = Depends(get_db)):
+    """搜索已发布文章：标题或 tags 包含关键字（大小写不敏感）。"""
+    if not q.strip():
+        return []
+    pattern = f"%{q.strip()}%"
+    return (
+        db.query(Post)
+        .filter(
+            Post.is_published == True,
+            or_(
+                Post.title.ilike(pattern),
+                cast(Post.tags, String).ilike(pattern),
+            ),
+        )
+        .order_by(Post.created_at.desc())
+        .all()
+    )
+
+
+@router.get("/tags/top")
+def top_tags(limit: int = Query(5, ge=1, le=20), db: Session = Depends(get_db)):
+    """返回使用频率最高的标签，最多 limit 个。"""
+    rows = db.query(Post.tags).filter(Post.is_published == True).all()
+    counter: Counter = Counter()
+    for (tags,) in rows:
+        if tags:
+            for tag in tags:
+                counter[tag] += 1
+    return [{"tag": tag, "count": count} for tag, count in counter.most_common(limit)]
 
 
 @router.get("/{slug}", response_model=PostResponse)

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import type { User } from "@/types/user";
 import { apiFetch } from "@/lib/fetch";
+import SearchModal from "@/components/SearchModal";
 
 const navItems = [
   { label: "笔记", href: "/notes" },
@@ -43,6 +44,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<User | null | undefined>(undefined);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     apiFetch("/auth/me")
@@ -55,9 +57,10 @@ export default function Navbar() {
     "relative inline-block py-1 transition-transform duration-300 ease-out hover:-translate-y-0.5 hover:text-[#1a1a1a]";
 
   return (
+    <>
     <nav className="fixed top-0 w-full z-50 bg-transparent backdrop-blur-md border-b border-white/20">
       <motion.div
-        className="flex items-center h-16 pl-[20%]"
+        className="flex items-center h-16 pl-[10%]"
         variants={container}
         initial="hidden"
         animate="visible"
@@ -100,12 +103,17 @@ export default function Navbar() {
         </ul>
 
         {/* 右侧鉴权入口 */}
-        <div className="ml-auto pr-[20%] flex items-center gap-8 text-base tracking-wide text-[#555]">
+        <div className="ml-auto pr-[10%] flex items-center gap-8 text-base tracking-wide text-[#555]">
           {user === undefined ? (
             /* 加载中，占位避免布局抖动 */
             <div className="w-32" />
           ) : (
             <>
+              <motion.div variants={child}>
+                <button onClick={() => setSearchOpen(true)} className={linkClass}>
+                  搜索
+                </button>
+              </motion.div>
               <motion.div variants={child}>
                 <Link href="/register" className={linkClass}>
                   注册
@@ -133,5 +141,7 @@ export default function Navbar() {
         </div>
       </motion.div>
     </nav>
+    {searchOpen && <SearchModal onClose={() => setSearchOpen(false)} />}
+    </>
   );
 }
