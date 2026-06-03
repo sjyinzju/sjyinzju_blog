@@ -1,13 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import auth, posts
+from routers import auth, posts, social
 
 app = FastAPI(title="Blog API", version="0.1.0")
 
 # ── 路由注册 ──
 app.include_router(posts.router)
 app.include_router(auth.router)
+app.include_router(social.router)
 
 # ── CORS（凭证模式：allow_credentials=True 时不能使用 ["*"]） ──
 app.add_middleware(
