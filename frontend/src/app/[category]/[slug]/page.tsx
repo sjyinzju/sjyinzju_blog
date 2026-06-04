@@ -16,8 +16,9 @@ export default async function CategoryPostPage({
   let post;
   try {
     post = await getPost(slug);
-  } catch {
-    return <NotFound />;
+  } catch (err) {
+    // 非 404 的错误（网络故障、500 等）向上抛出，触发 error.tsx
+    throw err;
   }
 
   if (!post) return <NotFound />;

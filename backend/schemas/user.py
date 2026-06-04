@@ -29,8 +29,8 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     """登录请求体。"""
 
-    email: str = Field(..., examples=["user@example.com"])
-    password: str = Field(..., examples=["my-secret-password"])
+    email: str = Field(..., max_length=320, examples=["user@example.com"])
+    password: str = Field(..., max_length=128, examples=["my-secret-password"])
 
 
 class UserUpdate(BaseModel):
@@ -38,7 +38,7 @@ class UserUpdate(BaseModel):
 
     username: str | None = Field(None, min_length=1, max_length=64)
     avatar: str | None = Field(None, max_length=512)
-    bio: str | None = None
+    bio: str | None = Field(None, max_length=500)
     website: str | None = Field(None, max_length=512)
 
 

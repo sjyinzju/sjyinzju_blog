@@ -34,6 +34,7 @@ export default function KnowledgeGraph() {
   const router = useRouter();
   const fgRef = useRef<any>(null);
   const [data, setData] = useState<GraphData | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const hoveredIdRef = useRef<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -52,8 +53,9 @@ export default function KnowledgeGraph() {
           }
         }
         setData(d);
+        setError(null);
       })
-      .catch(() => {});
+      .catch((err) => setError(err.message || "图谱加载失败"));
   }, []);
 
   useEffect(() => {
@@ -121,6 +123,25 @@ export default function KnowledgeGraph() {
     },
     [router]
   );
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-6">
+        <img
+          src="/error.png"
+          alt=""
+          className="w-[400px] h-auto object-contain pointer-events-none"
+        />
+        <p className="text-base text-[#999] tracking-wide">{error}</p>
+        <button
+          onClick={() => { setError(null); setData(null); }}
+          className="text-base text-[#1a1a1a] tracking-wide transition-transform duration-300 ease-out hover:-translate-y-0.5 hover:text-[#FF4A00]"
+        >
+          重试
+        </button>
+      </div>
+    );
+  }
 
   if (!data) {
     return (

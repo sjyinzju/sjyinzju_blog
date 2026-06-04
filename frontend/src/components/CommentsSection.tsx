@@ -106,26 +106,32 @@ export default function CommentsSection({ slug }: { slug: string }) {
   const [myComment, setMyComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // 加载当前用户
+  const loadData = () => {
+    setLoadError(null);
+    setComments([]);
+
+    // 加载当前用户（非关键，失败不影响主UI）
     apiFetch("/auth/me")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => setUser(data))
-      .catch(() => {});
+      .catch(() => setUser(null));
 
-    // 加载评论
+    // 加载评论（关键数据）
     apiFetch(`/posts/${slug}/comments`)
       .then((res) => (res.ok ? res.json() : []))
-      .then((data) => setComments(data))
-      .catch(() => {});
+      .then((data) => { setComments(data); setLoadError(null); })
+      .catch((err) => setLoadError(err.message || "评论加载失败"));
 
-    // 加载点赞（需要登录）
+    // 加载点赞（非关键）
     apiFetch(`/posts/${slug}/like/status`)
       .then((res) => (res.ok ? res.json() : { liked: false, count: 0 }))
       .then((data) => setLike(data))
-      .catch(() => {});
-  }, [slug]);
+      .catch(() => setLike({ liked: false, count: 0 }));
+  };
+
+  useEffect(() => { loadData(); }, [slug]);
 
   const handleLike = async () => {
     const res = await apiFetch(`/posts/${slug}/like`, { method: "POST" });
@@ -164,6 +170,25 @@ export default function CommentsSection({ slug }: { slug: string }) {
     }
     setSubmitting(false);
   };
+
+  if (loadError) {
+    return (
+      <section className="mt-16 flex flex-col items-center gap-6">
+        <img
+          src="/error.png"
+          alt=""
+          className="w-[400px] h-auto object-contain pointer-events-none"
+        />
+        <p className="text-base text-[#999] tracking-wide">{loadError}</p>
+        <button
+          onClick={loadData}
+          className="text-base text-[#1a1a1a] tracking-wide transition-transform duration-300 ease-out hover:-translate-y-0.5 hover:text-[#FF4A00]"
+        >
+          重试
+        </button>
+      </section>
+    );
+  }
 
   return (
     <section className="mt-16">

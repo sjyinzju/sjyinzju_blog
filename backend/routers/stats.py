@@ -39,6 +39,7 @@ def activity_heatmap(db: Session = Depends(get_db)):
         db.query(Post.created_at, Post.title, Post.slug, Post.categories, Post.tags)
         .filter(
             Post.is_published == True,
+            Post.is_deleted == False,
             Post.created_at >= start,
             Post.created_at < end + timedelta(days=1),
         )
@@ -50,6 +51,7 @@ def activity_heatmap(db: Session = Depends(get_db)):
         db.query(Comment.created_at)
         .filter(
             Comment.is_visible == True,
+            Comment.is_deleted == False,
             Comment.created_at >= start,
             Comment.created_at < end + timedelta(days=1),
         )
@@ -91,6 +93,7 @@ def day_activity(
         db.query(Post)
         .filter(
             Post.is_published == True,
+            Post.is_deleted == False,
             Post.created_at >= target,
             Post.created_at < next_day,
         )
@@ -102,6 +105,7 @@ def day_activity(
         db.query(Comment)
         .filter(
             Comment.is_visible == True,
+            Comment.is_deleted == False,
             Comment.created_at >= target,
             Comment.created_at < next_day,
         )

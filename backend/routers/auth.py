@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from core.config import settings
 from core.database import get_db
 from core.deps import get_current_user
+from core.limiter import limiter
 from core.security import (
     create_access_token,
     create_refresh_token,
@@ -47,7 +48,8 @@ def _set_auth_cookies(response: Response, access_token: str, refresh_token: str)
     response_model=UserOut,
     status_code=status.HTTP_201_CREATED,
 )
-def register(data: UserCreate, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def register(request: Request, data: UserCreate, db: Session = Depends(get_db)):
     """用户注册。校验邮箱/用户名唯一性，哈希密码后写入数据库。"""
     if db.query(User).filter(User.email == data.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -66,7 +68,8 @@ def register(data: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=UserOut)
-def login(data: UserLogin, response: Response, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def login(request: Request, data: UserLogin, response: Response, db: Session = Depends(get_db)):
     """用户登录。校验凭据，签发双 Token 并写入 httponly Cookie。"""
     user = db.query(User).filter(User.email == data.email).first()
     if not user or not verify_password(data.password, user.hashed_password):
@@ -176,10 +179,30 @@ async def update_me(
     """
     # 处理头像文件上传
     if avatar_file is not None and avatar_file.filename:
+        # ── 校验文件类型与大小 ──
+        AVATAR_MAX_SIZE = 2 * 1024 * 1024  # 2 MB
+        ALLOWED_MIME = {
+            "image/png": ".png",
+            "image/jpeg": ".jpg",
+            "image/gif": ".gif",
+            "image/webp": ".webp",
+        }
+
         contents = await avatar_file.read()
-        avatar_url = upload_file_to_s3(
-            contents, avatar_file.filename, avatar_file.content_type or "image/png"
-        )
+        if len(contents) > AVATAR_MAX_SIZE:
+            raise HTTPException(status_code=413, detail="头像文件不能超过 2 MB")
+
+        if avatar_file.content_type not in ALLOWED_MIME:
+            raise HTTPException(
+                status_code=400,
+                detail="仅支持 PNG / JPEG / GIF / WebP 格式的头像",
+            )
+
+        # 根据客户端声明的 MIME 推导扩展名（不再信任客户端直传 content-type）
+        ext = ALLOWED_MIME[avatar_file.content_type]
+        safe_content_type = avatar_file.content_type
+
+        avatar_url = upload_file_to_s3(contents, f"avatar{ext}", safe_content_type)
         current_user.avatar = avatar_url
     elif avatar is not None:
         current_user.avatar = avatar

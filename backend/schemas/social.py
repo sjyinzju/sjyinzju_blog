@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 # ═══════ 评论 ═══════
@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict
 
 class CommentCreate(BaseModel):
     """发表评论请求体。"""
-    content: str
+    content: str = Field(..., min_length=1, max_length=5000)
     parent_id: int | None = None
 
 

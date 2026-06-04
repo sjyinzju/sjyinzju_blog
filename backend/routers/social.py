@@ -1,10 +1,14 @@
 """评论 & 点赞接口"""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
 
 from core.database import get_db
 from core.deps import get_current_user
+from core.limiter import limiter
 from models.comment import Comment
 from models.like import Like
 from models.post import Post
@@ -20,32 +24,40 @@ router = APIRouter(tags=["Social"])
 
 
 @router.post("/posts/{slug}/like", response_model=LikeStatus)
+@limiter.limit("10/minute")
 def toggle_like(
+    request: Request,
     slug: str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """切换点赞状态：未点赞 → 点赞；已点赞 → 取消点赞。"""
-    post = db.query(Post).filter(Post.slug == slug).first()
+    """切换点赞状态：未点赞 → 点赞；已点赞 → 取消点赞。
+
+    使用 PostgreSQL INSERT ... ON CONFLICT DO NOTHING 实现原子级切换，
+    消除并发场景下的读-判-写竞态窗口。
+    """
+    post = db.query(Post).filter(Post.slug == slug, Post.is_deleted == False).first()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    existing = (
-        db.query(Like)
-        .filter(Like.user_id == current_user.id, Like.post_id == post.id)
-        .first()
+    stmt = (
+        pg_insert(Like)
+        .values(user_id=current_user.id, post_id=post.id)
+        .on_conflict_do_nothing(constraint="uq_like_user_post")
     )
+    result = db.execute(stmt)
 
-    if existing:
-        db.delete(existing)
-        db.commit()
-        liked = False
-    else:
-        like = Like(user_id=current_user.id, post_id=post.id)
-        db.add(like)
-        db.commit()
+    if result.rowcount > 0:
+        # 插入成功 → 之前未点赞，现在已点赞
         liked = True
+    else:
+        # 冲突 → 已存在，执行取消赞
+        db.query(Like).filter(
+            Like.user_id == current_user.id, Like.post_id == post.id
+        ).delete()
+        liked = False
 
+    db.commit()
     count = db.query(Like).filter(Like.post_id == post.id).count()
     return LikeStatus(liked=liked, count=count)
 
@@ -57,7 +69,7 @@ def get_like_status(
     db: Session = Depends(get_db),
 ):
     """查询当前用户对某篇文章的点赞状态和总数。"""
-    post = db.query(Post).filter(Post.slug == slug).first()
+    post = db.query(Post).filter(Post.slug == slug, Post.is_deleted == False).first()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
 
@@ -97,13 +109,13 @@ def _build_comment_tree(comments: list[Comment]) -> list[CommentOut]:
 @router.get("/posts/{slug}/comments", response_model=list[CommentOut])
 def list_comments(slug: str, db: Session = Depends(get_db)):
     """获取某篇文章的评论树（公开）。"""
-    post = db.query(Post).filter(Post.slug == slug).first()
+    post = db.query(Post).filter(Post.slug == slug, Post.is_deleted == False).first()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
 
     comments = (
         db.query(Comment)
-        .filter(Comment.post_id == post.id, Comment.is_visible == True)
+        .filter(Comment.post_id == post.id, Comment.is_visible == True, Comment.is_deleted == False)
         .order_by(Comment.created_at.asc())
         .all()
     )
@@ -116,20 +128,22 @@ def list_comments(slug: str, db: Session = Depends(get_db)):
     response_model=CommentOut,
     status_code=status.HTTP_201_CREATED,
 )
+@limiter.limit("10/minute")
 def create_comment(
+    request: Request,
     slug: str,
     data: CommentCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """发表评论（需要登录）。"""
-    post = db.query(Post).filter(Post.slug == slug).first()
+    post = db.query(Post).filter(Post.slug == slug, Post.is_deleted == False).first()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
 
     # 如果是回复，检查父评论是否存在且属于同一篇文章
     if data.parent_id:
-        parent = db.query(Comment).filter(Comment.id == data.parent_id).first()
+        parent = db.query(Comment).filter(Comment.id == data.parent_id, Comment.is_deleted == False).first()
         if not parent:
             raise HTTPException(status_code=404, detail="Parent comment not found")
         if parent.post_id != post.id:
@@ -154,7 +168,7 @@ def delete_comment(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """删除评论（仅作者本人或管理员）。"""
+    """软删除评论（仅作者本人或管理员）。"""
     comment = db.query(Comment).filter(Comment.id == comment_id).first()
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
@@ -162,6 +176,7 @@ def delete_comment(
     if comment.user_id != current_user.id and not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Not authorized to delete this comment")
 
-    db.delete(comment)
+    comment.is_deleted = True
+    comment.deleted_at = datetime.now(timezone.utc)
     db.commit()
     return None

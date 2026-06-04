@@ -1,4 +1,5 @@
 from collections import Counter
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import cast, or_, String
@@ -19,7 +20,7 @@ router = APIRouter(prefix="/posts", tags=["posts"])
 
 @router.get("/", response_model=list[PostResponse])
 def list_posts(db: Session = Depends(get_db)):
-    return db.query(Post).filter(Post.is_published == True).all()
+    return db.query(Post).filter(Post.is_published == True, Post.is_deleted == False).all()
 
 
 @router.get("/search", response_model=list[PostResponse])
@@ -32,6 +33,7 @@ def search_posts(q: str = Query(""), db: Session = Depends(get_db)):
         db.query(Post)
         .filter(
             Post.is_published == True,
+            Post.is_deleted == False,
             or_(
                 Post.title.ilike(pattern),
                 cast(Post.tags, String).ilike(pattern),
@@ -45,7 +47,7 @@ def search_posts(q: str = Query(""), db: Session = Depends(get_db)):
 @router.get("/tags/top")
 def top_tags(limit: int = Query(5, ge=1, le=20), db: Session = Depends(get_db)):
     """返回使用频率最高的标签，最多 limit 个。"""
-    rows = db.query(Post.tags).filter(Post.is_published == True).all()
+    rows = db.query(Post.tags).filter(Post.is_published == True, Post.is_deleted == False).all()
     counter: Counter = Counter()
     for (tags,) in rows:
         if tags:
@@ -60,7 +62,7 @@ VALID_CATEGORIES = {"笔记", "思考", "灵感", "资源"}
 @router.get("/graph", response_model=GraphData)
 def post_graph(db: Session = Depends(get_db)):
     """生成博客知识图谱：分类 → 标签 → 文章 的力导向图数据。"""
-    posts = db.query(Post).filter(Post.is_published == True).all()
+    posts = db.query(Post).filter(Post.is_published == True, Post.is_deleted == False).all()
 
     nodes: dict[str, GraphNode] = {}
     links: list[GraphLink] = []
@@ -124,7 +126,7 @@ def post_graph(db: Session = Depends(get_db)):
 
 @router.get("/{slug}", response_model=PostResponse)
 def get_post(slug: str, db: Session = Depends(get_db)):
-    post = db.query(Post).filter(Post.slug == slug).first()
+    post = db.query(Post).filter(Post.slug == slug, Post.is_deleted == False).first()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     return post
@@ -177,11 +179,12 @@ def delete_post(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_current_admin),
 ):
-    """删除文章（仅管理员，按 slug 定位）。"""
+    """软删除文章（仅管理员，按 slug 定位）。"""
     db_post = db.query(Post).filter(Post.slug == slug).first()
     if not db_post:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    db.delete(db_post)
+    db_post.is_deleted = True
+    db_post.deleted_at = datetime.now(timezone.utc)
     db.commit()
     return None

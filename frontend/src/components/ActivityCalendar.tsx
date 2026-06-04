@@ -25,13 +25,37 @@ export default function ActivityCalendar({
   onSelectDate?: (date: string) => void;
 }) {
   const [data, setData] = useState<HeatmapDay[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchData = () => {
+    setError(null);
+    setData([]);
     apiFetch("/stats/heatmap")
       .then((res) => (res.ok ? res.json() : []))
-      .then((d) => setData(d as HeatmapDay[]))
-      .catch(() => {});
-  }, []);
+      .then((d) => { setData(d as HeatmapDay[]); setError(null); })
+      .catch((err) => setError(err.message || "热力图加载失败"));
+  };
+
+  useEffect(() => { fetchData(); }, []);
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 gap-6">
+        <img
+          src="/error.png"
+          alt=""
+          className="w-[400px] h-auto object-contain pointer-events-none"
+        />
+        <p className="text-base text-[#999] tracking-wide">{error}</p>
+        <button
+          onClick={fetchData}
+          className="text-base text-[#1a1a1a] tracking-wide transition-transform duration-300 ease-out hover:-translate-y-0.5 hover:text-[#FF4A00]"
+        >
+          重试
+        </button>
+      </div>
+    );
+  }
 
   if (data.length === 0) {
     return (

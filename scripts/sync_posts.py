@@ -291,6 +291,10 @@ def sync(dry_run: bool = False) -> tuple[int, int, int]:
                     # 假设 slug 冲突（后端目前返回 400 或 422，视具体校验而定）
                     print(f"→ ⚠️  已存在 (slug: {payload['slug']})")
                     fail_count += 1
+                elif resp.status_code == 413:
+                    file_size = len(json.dumps(payload, ensure_ascii=False).encode("utf-8"))
+                    print(f"→ ❌ 请求体过大 ({file_size / 1024:.0f} KB)，超过后端 5 MB 限制")
+                    fail_count += 1
                 else:
                     detail = ""
                     try:

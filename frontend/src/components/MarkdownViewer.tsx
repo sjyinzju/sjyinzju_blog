@@ -1,4 +1,5 @@
 import ReactMarkdown from "react-markdown";
+import rehypeSanitize from "rehype-sanitize";
 
 function slugify(text: string): string {
   return text
@@ -39,7 +40,7 @@ function rehypeHeadingIds() {
 export default function MarkdownViewer({ content }: { content: string }) {
   return (
     <div className="prose max-w-none [&>h1:first-child]:hidden prose-headings:scroll-mt-32 prose-a:text-[#FF4A00] hover:prose-a:underline prose-ol:list-decimal prose-ul:list-disc">
-      <ReactMarkdown rehypePlugins={[rehypeHeadingIds]}>
+      <ReactMarkdown rehypePlugins={[rehypeHeadingIds, rehypeSanitize]}>
         {content}
       </ReactMarkdown>
     </div>

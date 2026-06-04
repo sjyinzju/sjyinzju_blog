@@ -22,7 +22,7 @@ export default function SearchModal({ onClose }: { onClose: () => void }) {
     apiFetch("/posts/tags/top?limit=5")
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => setTopTags(data))
-      .catch(() => {});
+      .catch(() => setTopTags([]));
   }, []);
 
   const doSearch = async (q: string) => {

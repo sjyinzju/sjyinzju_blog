@@ -23,5 +23,11 @@ class Comment(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+    is_deleted: Mapped[bool] = mapped_column(
+        Boolean, default=False, index=True, nullable=False
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), default=None, nullable=True
+    )
 
     user: Mapped[User] = relationship("User", lazy="joined")
