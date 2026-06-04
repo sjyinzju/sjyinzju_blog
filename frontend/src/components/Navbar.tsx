@@ -19,7 +19,7 @@ const navItems = [
   { label: "连接", href: "/connections" },
 ];
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const container = {
   hidden: { opacity: 0 },

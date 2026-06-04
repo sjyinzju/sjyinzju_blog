@@ -7,7 +7,7 @@ import InteractiveGrid from "@/components/InteractiveGrid";
 import FormPageHero from "@/components/FormPageHero";
 import FieldRow from "@/components/FieldRow";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const inputClass =
   "w-full text-base tracking-wide text-[#1a1a1a] bg-transparent border-0 border-b border-[#ddd] rounded-none py-1.5 placeholder:text-[#ccc] focus:outline-none focus:border-[#FF4A00] transition-colors duration-200";
