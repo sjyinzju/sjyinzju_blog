@@ -15,3 +15,9 @@ pgdata/
 .DS_Store
 
 /clear
+
+*.sql
+*.db
+*.sqlite3
+
+.env
