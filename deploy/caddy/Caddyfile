@@ -1,0 +1,50 @@
+# =============================================================================
+# MCP SSE 反向代理配置 — Caddy
+# =============================================================================
+# 适用环境：Caddy ≥ 2.6（自动签发 Let's Encrypt 证书，零手动配置）
+#
+# 部署步骤：
+#   1. 将此文件放到 /etc/caddy/Caddyfile（或 caddy run 所在目录）
+#   2. 替换 <YOUR_DOMAIN> 为实际域名
+#   3. sudo systemctl reload caddy
+#
+# Caddy 对比 Nginx 的优势：
+#   - 自动 SSL：无需 certbot，Caddy 自动向 Let's Encrypt 申请 & 续签
+#   - 配置简洁：一个 <10 行的 block 替代 Nginx 的 ~80 行
+#   - SSE 原生支持：flush_interval -1 即实时刷新，无需额外调参
+# =============================================================================
+
+<YOUR_DOMAIN> {
+    # ── 安全响应头 ──
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        # 确认无误后可开启 HSTS
+        # Strict-Transport-Security "max-age=63072000"
+    }
+
+    # ── 非 MCP 路径：直接拒绝 ──
+    handle {
+        respond 404
+    }
+
+    # ── MCP 路径：反代到 FastAPI 后端 ──
+    handle_path /mcp/* {
+        reverse_proxy 127.0.0.1:8000 {
+            # SSE 关键：实时刷新每一个事件，不做缓冲
+            flush_interval -1
+
+            # 透传客户端 IP 等请求头
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # ── 日志 ──
+    log {
+        output file /var/log/caddy/mcp_access.log
+    }
+}

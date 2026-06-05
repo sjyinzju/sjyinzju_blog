@@ -17,6 +17,7 @@ const navItems = [
   { label: "资源", href: "/resources" },
   { label: "关于", href: "/about" },
   { label: "连接", href: "/connections" },
+  { label: "MCP", href: "/mcp" },
 ];
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";

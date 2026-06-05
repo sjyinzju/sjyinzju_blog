@@ -16,6 +16,12 @@ class Settings(BaseSettings):
     SECURE_COOKIES: bool = False
     REDIS_URL: str = "redis://127.0.0.1:6379/0"
     MCP_SECRET_TOKEN: str
+    MCP_ADMIN_TOKEN: str
+
+    # Embedding API
+    EMBEDDING_API_BASE_URL: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    EMBEDDING_API_KEY: str = ""
+    EMBEDDING_MODEL: str = "text-embedding-v4"
 
     class Config:
         env_file = ".env"

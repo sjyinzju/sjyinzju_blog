@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import Boolean, DateTime, String, Text, func
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column
@@ -27,4 +28,7 @@ class Post(Base):
     )
     deleted_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), default=None, nullable=True
+    )
+    embedding: Mapped[list[float] | None] = mapped_column(
+        Vector(1024), nullable=True, default=None
     )

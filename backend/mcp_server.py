@@ -10,8 +10,9 @@ MCP Server — SSE 运行时底座
   Response 双重发送的兼容性问题。
 - Token 安全校验在 ASGI 中间件层完成，无需依赖 FastAPI Depends。
 
-当前为最小骨架 —— 尚未注册任何 Tool / Resource / Prompt，
-仅搭建 SSE 长连接 + 消息通道，供后续扩展。
+当前已注册 5 个 Tool：blog_list_posts / blog_search_posts /
+blog_get_post / blog_get_tags / blog_get_graph。
+详见 mcp_tools.py。
 """
 
 import logging
@@ -40,6 +41,11 @@ mcp_server = MCPServer(
     ),
 )
 
+# ── 注册业务 Tool（文章读取 / 搜索 / 标签 / 图谱） ──
+from mcp_tools import register_tools  # noqa: E402  ← 循环导入安全，延迟到 Server 实例化后
+
+register_tools(mcp_server)
+
 # ══════════════════════════════════════════════
 # 2. 创建 SSE 传输层
 # ══════════════════════════════════════════════
@@ -54,18 +60,20 @@ sse = SseServerTransport(endpoint="/messages")
 class _McpTokenAuthMiddleware:
     """ASGI 中间件：在每个 MCP 请求到达前校验 Bearer token。
 
-    直接在 ASGI 层拦截未授权请求，返回 401 JSON 响应。
-    授权通过则透传 scope / receive / send 给下游 ASGI 处理器。
+    支持双 token 体系：
+        MCP_SECRET_TOKEN  → mcp_auth_level = "read"   （只读：查文章/搜索/标签/图谱）
+        MCP_ADMIN_TOKEN   → mcp_auth_level = "admin"  （管理：发帖/推荐链接/更新）
 
-    设计要点：
-    - 独立于 FastAPI 的 Depends 体系，避免 SSE 长连接
-      关闭后 FastAPI 尝试重新发送 Response 导致的断言错误。
-    - 恒定时间比较防止时序侧信道攻击。
+    校验结果写入 ``scope["mcp_auth_level"]``，下游 Tool handler 通过 MCP
+    的 ``request_ctx`` 回读 Starlette Request → scope 获取权限级别。
+
+    恒时间比较防时序侧信道攻击。
     """
 
     def __init__(self, app: Starlette) -> None:
         self._app = app
-        self._token = settings.MCP_SECRET_TOKEN
+        self._read_token = settings.MCP_SECRET_TOKEN
+        self._admin_token = settings.MCP_ADMIN_TOKEN
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] != "http":
@@ -77,10 +85,23 @@ class _McpTokenAuthMiddleware:
         auth_bytes = raw_headers.get(b"authorization", b"")
         auth = auth_bytes.decode("latin-1")
 
-        # ── 校验 Bearer token ──
-        if not auth.startswith("Bearer ") or not _constant_time_compare(
-            auth[7:], self._token
-        ):
+        # ── 提取 Bearer token ──
+        if not auth.startswith("Bearer "):
+            response = JSONResponse(
+                status_code=401,
+                content={"detail": "Invalid MCP Token"},
+            )
+            await response(scope, receive, send)
+            return
+
+        token = auth[7:]
+
+        # ── 分级比对 ──
+        if _constant_time_compare(token, self._admin_token):
+            scope["mcp_auth_level"] = "admin"
+        elif _constant_time_compare(token, self._read_token):
+            scope["mcp_auth_level"] = "read"
+        else:
             response = JSONResponse(
                 status_code=401,
                 content={"detail": "Invalid MCP Token"},
