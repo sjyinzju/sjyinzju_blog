@@ -176,9 +176,21 @@ function ToolTable({
    ────────────────────────────────────────────── */
 
 export default function McpPage() {
-  const sseUrl = "https://mcp.your-domain.com/mcp/sse";
-  const readToken = "f2c89eaa...（你的 MCP_SECRET_TOKEN）";
-  const adminToken = "058908cc...（你的 MCP_ADMIN_TOKEN）";
+  const sseUrl = "https://api.sjyinzju.top/mcp/sse";
+  const readToken = "f2c89eaa57e38e40ad440bd128595be39c9577bd1689dc803c7bcff9a60f9530";
+  const adminToken = "058908cc26969bb7d9d8588a8f3ff51ec4b9b203a02db86cb7407b8e48d0509a";
+
+  const userConfig = `{
+  "mcpServers": {
+    "sjyblog": {
+      "type": "sse",
+      "url": "https://api.sjyinzju.top/mcp/sse",
+      "headers": {
+        "Authorization": "Bearer ${readToken}"
+      }
+    }
+  }
+}`;
 
   return (
     <div className="relative min-h-screen bg-[#F8F7F3]">
@@ -251,155 +263,103 @@ export default function McpPage() {
           </div>
         </section>
 
-        {/* ============ 配置教程 ============ */}
+        {/* ============ 配置教程（用户） ============ */}
         <section>
-          <h2 className="text-2xl font-bold text-[#1a1a1a] tracking-wide mb-6">
-            如何在 Agent 中配置
+          <h2 className="text-2xl font-bold text-[#1a1a1a] tracking-wide mb-2">
+            接入你的 AI Agent
           </h2>
+          <p className="text-base text-[#888] mb-6 leading-relaxed">
+            复制下面这段配置到对应位置，即可在 AI 中搜索和阅读博客内容。
+          </p>
 
-          {/* ── Claude Code ── */}
-          <div className="mb-10">
-            <h3 className="text-lg font-semibold text-[#1a1a1a] mb-3 tracking-wide">
-              Claude Code（.claude/mcp.json）
-            </h3>
-            <p className="text-sm text-[#888] mb-3 leading-relaxed">
-              在项目根目录或用户目录下创建/编辑{" "}
-              <code className="bg-[#F1EFEB] px-1">.claude/mcp.json</code>：
-            </p>
-
-            <CodeBlock
-              label="SSE 远程模式（仅读取）"
-              code={`{
-  "mcpServers": {
-    "sjyblog": {
-      "type": "sse",
-      "url": "${sseUrl}",
-      "headers": {
-        "Authorization": "Bearer ${readToken}"
-      }
-    }
-  }
-}`}
-            />
-
-            <CodeBlock
-              label="SSE 远程模式（含管理权限）"
-              code={`{
-  "mcpServers": {
-    "sjyblog-admin": {
-      "type": "sse",
-      "url": "${sseUrl}",
-      "headers": {
-        "Authorization": "Bearer ${adminToken}"
-      }
-    }
-  }
-}`}
-            />
-
-            <CodeBlock
-              label="stdio 本地模式（无需网络，自动管理员）"
-              code={`{
-  "mcpServers": {
-    "sjyblog": {
-      "command": "uv",
-      "args": ["run", "python", "mcp_stdio_bridge.py"],
-      "cwd": "/path/to/sjyinzju_blog/backend"
-    }
-  }
-}`}
-            />
+          {/* 一键复制卡片 */}
+          <div className="bg-[#F1EFEB] p-6 mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-base font-semibold text-[#1a1a1a] tracking-wide">
+                配置模板（只读，推荐）
+              </h3>
+              <CopyButton text={userConfig} />
+            </div>
+            <pre className="text-sm text-[#444] leading-relaxed whitespace-pre-wrap overflow-x-auto font-mono">
+{userConfig}</pre>
           </div>
 
-          {/* ── Claude Desktop ── */}
-          <div className="mb-10">
-            <h3 className="text-lg font-semibold text-[#1a1a1a] mb-3 tracking-wide">
+          {/* Claude Code */}
+          <div className="mb-6">
+            <h3 className="text-base font-semibold text-[#1a1a1a] tracking-wide mb-1">
+              Claude Code
+            </h3>
+            <p className="text-sm text-[#888]">
+              将上面配置粘贴到项目或用户目录的{" "}
+              <code className="bg-[#F1EFEB] px-1">.claude/mcp.json</code>。
+            </p>
+          </div>
+
+          {/* Claude Desktop */}
+          <div className="mb-6">
+            <h3 className="text-base font-semibold text-[#1a1a1a] tracking-wide mb-1">
               Claude Desktop
             </h3>
-            <p className="text-sm text-[#888] mb-3 leading-relaxed">
-              编辑{" "}
-              <code className="bg-[#F1EFEB] px-1">
-                claude_desktop_config.json
-              </code>
-              （位置：macOS{" "}
-              <code className="bg-[#F1EFEB] px-1">
-                ~/Library/Application Support/Claude/
-              </code>
-              ，Windows{" "}
-              <code className="bg-[#F1EFEB] px-1">
-                %APPDATA%\Claude\
-              </code>
-              ）：
+            <p className="text-sm text-[#888]">
+              将上面配置粘贴到{" "}
+              <code className="bg-[#F1EFEB] px-1">claude_desktop_config.json</code>。
+              <br />
+              <span className="text-xs text-[#aaa]">
+                macOS: ~/Library/Application Support/Claude/ &nbsp;|&nbsp;
+                Windows: %APPDATA%\Claude\
+              </span>
             </p>
-
-            <CodeBlock
-              code={`{
-  "mcpServers": {
-    "sjyblog": {
-      "type": "sse",
-      "url": "${sseUrl}",
-      "headers": {
-        "Authorization": "Bearer <你的 Token>"
-      }
-    }
-  }
-}`}
-            />
           </div>
 
-          {/* ── Cursor / Windsurf / 其他 ── */}
-          <div>
-            <h3 className="text-lg font-semibold text-[#1a1a1a] mb-3 tracking-wide">
-              Cursor / Windsurf / 其他 MCP 客户端
+          {/* 其他客户端 */}
+          <div className="mb-8">
+            <h3 className="text-base font-semibold text-[#1a1a1a] tracking-wide mb-1">
+              Cursor / Windsurf / 其他
             </h3>
-            <p className="text-sm text-[#888] mb-3 leading-relaxed">
-              任何支持 MCP
-              协议的客户端都可以连接。只需提供以下两个信息：
-            </p>
-
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-[#e0ddd8]">
-                    <th className="py-2 pr-4 text-sm font-semibold text-[#888] tracking-wide">
-                      字段
-                    </th>
-                    <th className="py-2 text-sm font-semibold text-[#888] tracking-wide">
-                      值
-                    </th>
+                    <th className="py-2 pr-4 text-sm font-semibold text-[#888]">字段</th>
+                    <th className="py-2 text-sm font-semibold text-[#888]">值</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-b border-[#f0ede8]">
-                    <td className="py-2.5 pr-4 text-sm font-mono text-[#555]">
-                      transport
-                    </td>
-                    <td className="py-2.5 text-sm font-mono text-[#FF4A00]">
-                      sse
-                    </td>
+                    <td className="py-2 pr-4 text-sm font-mono text-[#555]">transport</td>
+                    <td className="py-2 text-sm font-mono text-[#FF4A00]">sse</td>
                   </tr>
                   <tr className="border-b border-[#f0ede8]">
-                    <td className="py-2.5 pr-4 text-sm font-mono text-[#555]">
-                      url
-                    </td>
-                    <td className="py-2.5 text-sm font-mono text-[#FF4A00]">
-                      {sseUrl}
-                    </td>
+                    <td className="py-2 pr-4 text-sm font-mono text-[#555]">url</td>
+                    <td className="py-2 text-sm font-mono text-[#FF4A00]">{sseUrl}</td>
                   </tr>
                   <tr>
-                    <td className="py-2.5 pr-4 text-sm font-mono text-[#555]">
-                      auth header
-                    </td>
-                    <td className="py-2.5 text-sm text-[#777]">
-                      <code className="bg-[#F1EFEB] px-1">
-                        Authorization: Bearer &lt;你的 Token&gt;
-                      </code>
+                    <td className="py-2 pr-4 text-sm font-mono text-[#555]">auth header</td>
+                    <td className="py-2 text-sm text-[#777]">
+                      <code className="bg-[#F1EFEB] px-1">Authorization: Bearer {readToken.substring(0, 12)}...</code>
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
+
+          {/* 管理员配置（折叠） */}
+          <details className="mb-4">
+            <summary className="text-base font-semibold text-[#FF4A00] tracking-wide cursor-pointer hover:underline">
+              🔧 管理员配置（完整权限）
+            </summary>
+            <p className="text-sm text-[#888] mt-2 mb-3">
+              将上述配置中的 Authorization 替换为管理 Token：
+            </p>
+            <CodeBlock
+              code={`"Authorization": "Bearer ${adminToken}"`}
+            />
+            <p className="text-sm text-[#888] mt-2">
+              管理 Token 拥有发布文章、推荐双链、更新元数据、重建索引等完整权限。
+              仅自己使用，勿分享给他人。
+            </p>
+          </details>
         </section>
 
         {/* ============ 部署说明 ============ */}
