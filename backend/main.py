@@ -7,7 +7,7 @@ from slowapi.errors import RateLimitExceeded
 from core.config import settings
 from core.limiter import limiter
 from mcp_server import build_mcp_app
-from routers import auth, posts, social, stats
+from routers import auth, media, posts, social, stats
 
 app = FastAPI(title="Blog API", version="0.1.0")
 
@@ -19,6 +19,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.include_router(posts.router)
 app.include_router(auth.router)
 app.include_router(social.router)
+app.include_router(media.router)
 app.include_router(stats.router)
 
 # ── MCP SSE 子应用（ASGI 层挂载，自带 Token 安全校验） ──

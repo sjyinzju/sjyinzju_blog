@@ -57,4 +57,5 @@ def upload_file_to_s3(file_bytes: bytes, filename: str, content_type: str) -> st
         ContentType=content_type,
     )
 
-    return f"{settings.S3_ENDPOINT_URL}/{settings.S3_BUCKET_NAME}/{key}"
+    base = settings.S3_PUBLIC_BASE_URL or settings.S3_ENDPOINT_URL
+    return f"{base}/{settings.S3_BUCKET_NAME}/{key}"
